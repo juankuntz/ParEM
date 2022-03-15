@@ -1,11 +1,10 @@
-# <p align="center">Scalable particle-based alternatives to EM<br><br> ArXiv preprint</p>
+# <p align="center">Scalable particle-based alternatives to EM<br><br> Preprint</p>
 
 <div align="center">
   <a href="https://juankuntz.github.io/" target="_blank">Juan&nbsp;Kuntz</a> &emsp; <b>&middot;</b> &emsp;
-  <a href="https://warwick.ac.uk/fac/sci/statistics/staff/academic-research/johansen/" target="_blank">Adam M.&nbsp;Johansen</a> &emsp; <b>&middot;</b> 
+  <a href="https://warwick.ac.uk/fac/sci/statistics/staff/academic-research/johansen/" target="_blank">Adam M.&nbsp;Johansen</a> &emsp; </b> 
   <br> <br>
-  <a href="..." target="_blank">Paper</a> &emsp;
-  <a href=".." target="_blank">...&nbsp;Page</a> 
+  <a href="..." target="_blank">Paper</a> 
 </div>
 
 ## Description
@@ -14,9 +13,9 @@ Interactive Jupyter notebooks illustrating the application of the algorithms in 
 
 ## Run in Colab
 
-There is a noteboook per example in the paper:
+There is a noteboook for each example in the paper:
 
-| Link | Description|
+| Link | Example |
 |:----:|:-----|
 |[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1IBW5em23nc-03AYRtsLSJKUrw3zLhyl3?usp=sharing)  | Toy Hierarchical Model |
 |[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](...) | Bayesian Logistic Regression |
