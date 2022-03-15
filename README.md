@@ -1,10 +1,9 @@
-# <p align="center">Scalable particle-based alternatives to EM<br><br> Preprint</p>
+# <p align="center">Scalable particle-based alternatives to the Expectation Maximization Algorithm<br><br> Preprint</p>
 
 <div align="center">
   <a href="https://juankuntz.github.io/" target="_blank">Juan&nbsp;Kuntz</a> &emsp; <b>&middot;</b> &emsp;
   <a href="https://warwick.ac.uk/fac/sci/statistics/staff/academic-research/johansen/" target="_blank">Adam M.&nbsp;Johansen</a> &emsp; </b> 
-  <br> <br>
-  <a href="..." target="_blank">Paper</a> 
+
 </div>
 
 ## Description
