@@ -8,10 +8,13 @@
   <a href=".." target="_blank">...&nbsp;Page</a> 
 </div>
 
+## Description
+
+Interactive Jupyter notebooks illustrating the application of the algorithms in [Kuntz & Johansen (2022)]() and reproducing the results in the paper.
 
 ## Run in Colab
 
-We have written interactive Colab notebooks illustrating the application of our algorithms and reproducing our results. There's one per example in paper:
+There is a noteboook per example in the paper:
 
 | Link | Description|
 |:----:|:-----|
