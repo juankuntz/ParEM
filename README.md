@@ -17,7 +17,7 @@ There is a noteboook for each example in the paper:
 | Link | Example |
 |:----:|:-----|
 |[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1IBW5em23nc-03AYRtsLSJKUrw3zLhyl3?usp=sharing)  | Toy Hierarchical Model |
-|[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](...) | Bayesian Logistic Regression |
+|[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1Bb47VSn8u56ONWcixcracwU0Fj-OaD_2?usp=sharing) | Bayesian Logistic Regression |
 |[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1Xcc9iVDS6qo_vNz33aWi8AxPQN9hm7Hf?usp=sharing) | Bayesian Neural Network |
 
 ## Run locally
