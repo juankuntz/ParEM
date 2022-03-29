@@ -8,9 +8,9 @@
 
 ## Description
 
-Interactive Jupyter notebooks illustrating the application of the algorithms in [Kuntz & Johansen (2022)]() and reproducing the results in the paper.
+This repository contains Jupyter notebooks illustrating the application of the algorithms in [Kuntz & Johansen (2022)]() and reproducing the results in the paper. You can run them either on [Google Colab](https://colab.research.google.com/) or locally on your machine.
 
-## Run in Colab
+## Run on Colab
 
 There is a noteboook for each example in the paper:
 
