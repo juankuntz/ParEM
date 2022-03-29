@@ -22,11 +22,15 @@ The notebooks can be accessed by clicking the links below and logging into a Goo
 
 ## Run locally
 
-... is built in Python ... using JAX .... Please use the following command to install the requirements:
-```shell script
-pip install --upgrade pip
-pip install -r requirements.txt -f https://download.pytorch.org/whl/torch_stable.html -f https://storage.googleapis.com/jax-releases/jax_releases.html
-``` 
+Running the notebooks locally requires:
+
+- Python == 3.
+- NumPy == 1.20.3
+- Matplotlib == 3.4.3
+- scikit-learn == 0.24.2
+- Keras == 2.8.0
+- JAX == 
+
 
 ## Citation
 If you find the code useful for your research, please consider citing our preprint:
