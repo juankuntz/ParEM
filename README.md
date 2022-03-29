@@ -12,7 +12,7 @@ This repository contains Jupyter notebooks illustrating the application of the a
 
 ## Run on Colab
 
-There is a noteboook for each example in the paper:
+The notebooks can be accessed by clicking the links below and logging into a Google Account.
 
 | Link | Example |
 |:----:|:-----|
