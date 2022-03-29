@@ -24,13 +24,15 @@ The notebooks can be accessed by clicking the links below and logging into a Goo
 
 Running the notebooks locally requires:
 
-- Python == 3.
-- NumPy == 1.20.3
-- Matplotlib == 3.4.3
+- python == 3.9.7
+- notebook == 6.4.5
+- numpy == 1.20.3
+- matplotlib == 3.4.3
 - scikit-learn == 0.24.2
-- Keras == 2.8.0
-- JAX == 
+- keras == 2.8.0
+- jax == 0.2.27
 
+All except for jax come with the Python 3.9 [Anaconda Distribution](https://www.anaconda.com/products/distribution). To install jax, follow the instructions [here](https://jax.readthedocs.io/en/latest/developer.html).
 
 ## Citation
 If you find the code useful for your research, please consider citing our preprint:
