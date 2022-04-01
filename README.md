@@ -46,8 +46,8 @@ year  = {2022}
 }
 ```
 
-<## License>
+<!--- License
 
 Copyright © 2022, ...
 
-This work is made available under ... Please see our main [LICENSE](./LICENSE) file.>
+This work is made available under ... Please see our main [LICENSE](./LICENSE) file.-->
