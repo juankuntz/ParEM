@@ -32,7 +32,7 @@ Running the notebooks locally requires:
 - keras == 2.8.0
 - jax == 0.2.27
 
-All except for jax come with the Python 3.9 [Anaconda Distribution](https://www.anaconda.com/products/distribution). To install jax, follow the instructions [here](https://jax.readthedocs.io/en/latest/developer.html).
+All except for jax come with the [Anaconda Python 3.9 Distribution](https://www.anaconda.com/products/distribution). To install jax, follow the instructions [here](https://jax.readthedocs.io/en/latest/developer.html).
 
 ## Citation
 If you find the code useful for your research, please consider citing our preprint:
@@ -46,8 +46,8 @@ year  = {2022}
 }
 ```
 
-## License
+%## License
 
-Copyright © 2022, ...
+%Copyright © 2022, ...
 
-This work is made available under ... Please see our main [LICENSE](./LICENSE) file.
+%This work is made available under ... Please see our main [LICENSE](./LICENSE) file.
