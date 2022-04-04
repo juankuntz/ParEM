@@ -32,7 +32,10 @@ Running the notebooks locally requires:
 - keras == 2.8.0
 - jax == 0.2.27
 
-All except for jax come with the [Anaconda Python 3.9 Distribution](https://www.anaconda.com/products/distribution). To install jax, follow the instructions [here](https://jax.readthedocs.io/en/latest/developer.html).
+All except for jax come with the [Anaconda Python 3.9 Distribution](https://www.anaconda.com/products/distribution). To install jax, follow the instructions [here](https://jax.readthedocs.io/en/latest/developer.html). Then, just clone the repository and open the notebooks:
+
+`git clone https://github.com/juankuntz/ParEM.git
+jupyter-notebook name_of_notebook.ipynb`
 
 ## Citation
 If you find the code useful for your research, please consider citing our preprint:
