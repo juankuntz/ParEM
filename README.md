@@ -31,13 +31,19 @@ Running the notebooks locally requires:
 - scikit-learn == 0.24.2
 - keras == 2.8.0
 - jax == 0.2.27
+- jaxlib == 0.1.75 
 
-All except for jax come with the [Anaconda Python 3.9 Distribution](https://www.anaconda.com/products/distribution). To install jax, follow the instructions [here](https://jax.readthedocs.io/en/latest/developer.html). 
-
-With the above installed, just clone the repository and open the notebooks:
+To setup a [conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html), clone the repository and use the environment.yml included in it:
 
 ```
 git clone https://github.com/juankuntz/ParEM.git
+conda env create -f environment.yml
+conda activate ParEM
+```
+
+Then run the desired notebook:
+
+```
 jupyter-notebook name_of_notebook.ipynb
 ```
 
