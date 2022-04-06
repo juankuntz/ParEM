@@ -33,7 +33,7 @@ Running the notebooks locally requires:
 - jax == 0.2.27
 - jaxlib == 0.1.75 
 
-To setup a [conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html), clone the repository and use the environment.yml included in it:
+To setup a [conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html), clone the repository and use the `environment.yml` included in it:
 
 ```
 git clone https://github.com/juankuntz/ParEM.git
@@ -61,6 +61,4 @@ year  = {2022}
 
 <!--- License
 
-Copyright © 2022, ...
-
-This work is made available under ... Please see our main [LICENSE](./LICENSE) file.-->
+This work is made available under the MIT License. Please see our main [LICENSE](./LICENSE) file.-->
