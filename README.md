@@ -59,6 +59,6 @@ year  = {2022}
 }
 ```
 
-<!--- License
+## License
 
-This work is made available under the MIT License. Please see our main [LICENSE](./LICENSE) file.-->
+This work is made available under the MIT License. Please see our main [LICENSE](./LICENSE) file.
