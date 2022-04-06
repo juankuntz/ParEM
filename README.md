@@ -8,7 +8,7 @@
 
 ## Description
 
-This repository contains Jupyter notebooks illustrating the application of the algorithms in [Kuntz & Johansen (2022)]() and reproducing the results in the paper. You can run them either on [Google Colab](https://colab.research.google.com/) or locally on your machine.
+This repository contains Jupyter notebooks illustrating the application of the algorithms in [Kuntz & Johansen (2022)](https://juankuntz.github.io/publication/parem/) and reproducing the results in the paper. You can run them either on [Google Colab](https://colab.research.google.com/) or locally on your machine.
 
 ## Run on Colab
 
@@ -31,8 +31,21 @@ Running the notebooks locally requires:
 - scikit-learn == 0.24.2
 - keras == 2.8.0
 - jax == 0.2.27
+- jaxlib == 0.1.75 
 
-All except for jax come with the [Anaconda Python 3.9 Distribution](https://www.anaconda.com/products/distribution). To install jax, follow the instructions [here](https://jax.readthedocs.io/en/latest/developer.html).
+To setup a [conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html) with these packages, clone the repository and use the `environment.yml` included in it:
+
+```
+git clone https://github.com/juankuntz/ParEM.git
+conda env create -f environment.yml
+conda activate ParEM
+```
+
+Then run the desired notebook:
+
+```
+jupyter-notebook name_of_notebook.ipynb
+```
 
 ## Citation
 If you find the code useful for your research, please consider citing our preprint:
@@ -46,8 +59,6 @@ year  = {2022}
 }
 ```
 
-<!--- License
+## License
 
-Copyright © 2022, ...
-
-This work is made available under ... Please see our main [LICENSE](./LICENSE) file.-->
+This work is made available under the MIT License. Please see our main [LICENSE](./LICENSE) file.
