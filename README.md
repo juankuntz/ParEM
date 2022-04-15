@@ -24,14 +24,15 @@ The notebooks can be accessed by clicking the links below and logging into a Goo
 
 Running the notebooks locally requires:
 
-- python == 3.9.7
-- notebook == 6.4.5
-- numpy == 1.20.3
-- matplotlib == 3.4.3
-- scikit-learn == 0.24.2
-- keras == 2.8.0
 - jax == 0.2.27
 - jaxlib == 0.1.75 
+- keras == 2.8.0
+- matplotlib == 3.4.3
+- notebook == 6.4.5
+- numpy == 1.20.3
+- python == 3.9.7
+- scikit-learn == 0.24.2
+- wget == 3.2
 
 To setup a [conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html) with these packages, clone the repository and use the `environment.yml` file included in it:
 
