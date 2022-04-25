@@ -38,7 +38,7 @@ To setup a [conda environment](https://docs.conda.io/projects/conda/en/latest/us
 
 ```
 git clone https://github.com/juankuntz/ParEM.git
-conda env create -f environment.yml
+conda env create -f ./ParEM/environment.yml
 conda activate ParEM
 ```
 
