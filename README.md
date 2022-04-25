@@ -45,7 +45,7 @@ conda activate ParEM
 Then run the desired notebook:
 
 ```
-jupyter-notebook name_of_notebook.ipynb
+jupyter-notebook ./ParEM/name_of_notebook.ipynb
 ```
 
 ## Citation
