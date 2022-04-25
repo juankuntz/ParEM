@@ -10,5 +10,5 @@ dependencies:
   - keras=2.8.0
   - jax=0.2.27
   - jaxlib=0.1.75
-  - wget=3.2
+  - python-wget=3.2
 
