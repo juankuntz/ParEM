@@ -1,4 +1,4 @@
-# <p align="center">Scalable particle-based alternatives to EM<br><br> In preparation</p>
+# <p align="center">Scalable particle-based alternatives to EM<br><br>Under review</p>
 
 <div align="center">
   <a href="https://juankuntz.github.io/" target="_blank">Juan&nbsp;Kuntz</a> &emsp; <b>&middot;</b> &emsp;
