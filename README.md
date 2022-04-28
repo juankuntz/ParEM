@@ -55,7 +55,7 @@ If you find the code useful for your research, please consider citing our prepri
 @article{Kuntz2022,
 author = {Kuntz, J. and Johansen, A. M.},
 title = {Scalable particle-based alternatives to EM},
-journal = {In prepartion},
+journal = {arXiv preprint arXiv:2204.12965},
 year  = {2022}
 }
 ```
