@@ -9,7 +9,7 @@
 
 ## Description
 
-This repository contains Jupyter notebooks illustrating the application of the algorithms in [Kuntz & Johansen (2022)](https://juankuntz.github.io/publication/parem/) and reproducing the results in the paper. You can run them either on [Google Colab](https://colab.research.google.com/) or locally on your machine.
+This repository contains Jupyter notebooks illustrating the application of the algorithms in [Kuntz et al. (2022)](https://juankuntz.github.io/publication/parem/) and reproducing the results in the paper. You can run them either on [Google Colab](https://colab.research.google.com/) or locally on your machine.
 
 ## Run on Colab
 
