@@ -9,13 +9,10 @@
 
 ## Description
 
-This repository contains the source code illustrating the application of the
+This repository contains code illustrating the application of the
 algorithms in [Kuntz et al. (2022)](https://juankuntz.github.io/publication/parem/)
-and reproducing the results in the paper. For the Toy Hierarchical Model (Example 1, and Figure 2),
-Logistic Regression (Appendix F.4), and Bayesian Neural Network (Section 4.1), the code is contained in the
-`jax` folder in [JAX](https://github.com/google/jax). As for the generator 
-model example (Section 4.2), the code can be found in the `torch` folder.
-You can run them either on [Google Colab](https://colab.research.google.com/) or
+and reproducing the results in the paper. In particular, for the toy hierarchical model (Section 2.1), Bayesian neural network (Section 4.1), and the Bayesian logistic regression (Appendix F.4) examples, we use [JAX](https://github.com/google/jax) and the source code is in the `jax` folder. For the generator network example (Section 4.2), we use [PyTorch](https://pytorch.org/) and the source code is in the `torch` folder.
+You can run these either on [Google Colab](https://colab.research.google.com/) or
 locally on your machine.
 
 ## Run on Colab
@@ -35,7 +32,7 @@ If you find the code useful for your research, please consider citing our prepri
 
 ```bib
 @article{Kuntz2022,
-author = {Kuntz, J. and Johansen, A. M.},
+author = {Kuntz, J. and Lim, J. N. and Johansen, A. M.},
 title = {Scalable particle-based alternatives to EM},
 journal = {arXiv preprint arXiv:2204.12965},
 year  = {2022}
