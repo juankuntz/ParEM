@@ -82,7 +82,7 @@ class Algorithm:
 
         if wandb_log:  # Setup logging.
             wandb.login()
-            wandb.init(project=f"PGA_dev_{self.dataset.name}", config=self.__dict__)
+            wandb.init(project=f"PGD_{self.dataset.name}", config=self.__dict__)
             # wandb.watch(self._model, log="all", log_freq=10)
 
         # Split dataset into batches for training:
@@ -442,9 +442,10 @@ class ParticleBasedAlgorithm(Algorithm):
         return "ParticleBasedAlgorithm"
 
 
-class PGA(ParticleBasedAlgorithm):
+class PGD(ParticleBasedAlgorithm):
     """
-    Implementation of the PGA algorithm in https://arxiv.org/pdf/2204.12965.pdf.
+    Implementation of the PGD algorithm in https://arxiv.org/pdf/2204.12965.pdf.
+
     """
     def __init__(self,
                  model: NLVM,
@@ -457,7 +458,7 @@ class PGA(ParticleBasedAlgorithm):
                  device: str = 'cpu'):
         self.lambd = lambd
         theta_step_size = particle_step_size * len(dataset) * lambd
-        self.name = "PGA_smallbatch"
+        self.name = "PGD"
         super().__init__(model, dataset, theta_step_size=theta_step_size,
                          train_batch_size=train_batch_size,
                          n_particles=n_particles,
@@ -470,6 +471,10 @@ class PGA(ParticleBasedAlgorithm):
                                    'width', 'height'],
              idx: TensorType['batch_size']
              ) -> TensorType[()]:
+        """
+        Performs a sub-sample of PGD https://arxiv.org/pdf/2204.12965.pdf.
+        See Eq. 16 and Eq. 13.
+        """
         ## Compute theta gradients ##
 
         # Turn on theta gradients:
@@ -516,7 +521,10 @@ class PGA(ParticleBasedAlgorithm):
         return loss.item()
 
     def update_posterior(self,):
-        pass
+        """
+        For a description, see inherited `Algorithm` class.
+        """
+        pass  # Do nothing
 
 
 class ShortRun(ParticleBasedAlgorithm):
@@ -547,6 +555,10 @@ class ShortRun(ParticleBasedAlgorithm):
                                    'width', 'height'],
              idx: TensorType['batch_size']
              ) -> TensorType[()]:
+        """
+        Runs a short chain (with length self.n_chain_length) Langevin algorithm with step size self.particle_step_size.
+        Note that the chains are initialized randomly.
+        """
         ## Run short run ##
         self._model.eval()
         self._model.requires_grad_(False)
@@ -567,7 +579,6 @@ class ShortRun(ParticleBasedAlgorithm):
             particles = particles + ((2 * self.particle_step_size) ** 0.5
                                      * torch.randn_like(particles))
             particles = particles.detach().clone().requires_grad_(True)
-        self._posterior[idx] = particles.detach().clone().to(self._posterior.device)
 
         ## Compute theta gradients ##
 
@@ -590,14 +601,18 @@ class ShortRun(ParticleBasedAlgorithm):
         return loss.item()
 
     def update_posterior(self,):
+        """
+        For a description, see inherited `Algorithm` class.
+        """
         self.eval()
 
-        # Run chain for the whole particle cloud
+        # Run chain for the whole posterior cloud
         if not self._posterior_up_to_date:
             dataloader = torch.utils.data.DataLoader(self.dataset, batch_size=250)
             for img_particle_batch, *_, particle_idx in dataloader:
                 particles = (torch.randn(img_particle_batch.shape[0], self.n_particles, self._model.x_dim)
                              .to(self.device).requires_grad_(True))
+                # Run chain for a subset of the posterior cloud
                 for i in range(self.n_chain_length):
                     log_p_v = self._model.log_p_v(img_particle_batch.to(self.device),
                                                   particles).sum()
@@ -609,13 +624,15 @@ class ShortRun(ParticleBasedAlgorithm):
                     particles = particles + ((2 * self.particle_step_size) ** 0.5
                                              * torch.randn_like(particles))
                     particles = particles.detach().clone().requires_grad_(True)
+                # Update posterior
                 self._posterior[particle_idx] = particles.detach().clone().to(self._posterior.device)
         self._posterior_up_to_date = True
 
 
 class AlternatingBackprop(ParticleBasedAlgorithm):
     """
-    Implementation of Alternating Backprop: a persistent version of short run algorithm.
+    Implementation of a subsampled version of Alternating Backprop: a 
+    persistent version of short run algorithm.
     See https://arxiv.org/abs/1606.08571.
     """
     def __init__(self,
@@ -642,10 +659,14 @@ class AlternatingBackprop(ParticleBasedAlgorithm):
                                    'width', 'height'],
              idx: TensorType['batch_size']
              ) -> TensorType[()]:
+        """
+        Runs a short chain (with length self.n_chain_length) Langevin algorithm with step size self.particle_step_size.
+        The chain is initialized from its the previous step.
+        """
         ## Run short run ##
         self.eval()
 
-        # Run chain for the whole particle cloud
+        # Run chain for the subset of the particle cloud.
         particles = self._posterior[idx].detach().clone().to(self.device).requires_grad_(True)
         for i in range(self.n_chain_length):
             log_p_v = self._model.log_p_v(img_batch.to(self.device),
@@ -658,6 +679,7 @@ class AlternatingBackprop(ParticleBasedAlgorithm):
             particles = particles + ((2 * self.particle_step_size) ** 0.5
                                      * torch.randn_like(particles))
             particles = particles.detach().clone().requires_grad_(True)
+        # Update posterior.
         self._posterior[idx] = particles.detach().clone().to(self._posterior.device)
         # Compute theta gradients
 
@@ -680,7 +702,10 @@ class AlternatingBackprop(ParticleBasedAlgorithm):
         return loss.item()
 
     def update_posterior(self):
-        pass
+        """
+        For a description, see inherited `Algorithm` class.
+        """
+        pass  # Do Nothing
 
 
 class VI(Algorithm):
@@ -706,11 +731,17 @@ class VI(Algorithm):
         self.name = 'VI'
 
     def train(self):
+        """
+        For a description, see inherited `Algorithm` class.
+        """
         self._model.train()
         self._model.requires_grad_(True)
         self._encoder.train()
 
     def eval(self):
+        """
+        For a description, see inherited `Algorithm` class.
+        """
         self._model.eval()
         self._model.requires_grad_(False)
         self._encoder.eval()
@@ -732,10 +763,6 @@ class VI(Algorithm):
                         self.n_particles,
                         self._model.x_dim).to(mu.device) * var.unsqueeze(1) ** 0.5 + mu.unsqueeze(1)
 
-        # Update particle cloud
-        # TODO: Should be removed maybe?
-        self._posterior[idx] = z.clone().detach().to(self._posterior.device)
-
         # Compute loss
         log_prob = self._model.log_p_v(img_batch, z).mean()
         kl = 0.5 * (1 + torch.log(var) - mu ** 2 - var).sum()
@@ -753,7 +780,9 @@ class VI(Algorithm):
         return loss.item()
 
     def sample_image_posterior(self, idx, n: int):  # TODO: add idx type hint
-        """Returns first n samples from idx's image posterior."""
+        """
+        For a description, see inherited `Algorithm` class.
+        """
         self.eval()
         with torch.no_grad():
             image = self.dataset[idx][0].unsqueeze(0)
@@ -765,15 +794,21 @@ class VI(Algorithm):
             utils.show_images(torch.concat([image, posterior_samples], dim=0))
 
     def update_posterior(self):
+        """
+        For a description, see inherited `Algorithm` class.
+        """
         self.eval()
         if not self._posterior_up_to_date:
             batches = torch.utils.data.DataLoader(self.dataset,
                                                   batch_size=750,
                                                   pin_memory=True)
             for img_batch, *_, idx in batches:
+                #  Use the encoder to infer the latent distribution
                 mu, var = self._encoder(img_batch.to(self.device))
+                # Sample from the desired distribution
                 z = torch.randn(img_batch.shape[0],
                                 self.n_particles,
                                 self._model.x_dim).to(mu.device) * var.unsqueeze(1) ** 0.5 + mu.unsqueeze(1)
+                # update the posterior
                 self._posterior[idx] = z.clone().detach().to(self._posterior.device)
         self._posterior_up_to_date = True
