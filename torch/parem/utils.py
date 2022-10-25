@@ -1,3 +1,10 @@
+# -----------------------------------------------------------
+# This file contains all the utility code for:
+# * interacting with the dataset (`get_celeba`, `get_mnist`) modified from https://github.com/enijkamp/short_run_inf.
+# * saving checkpoints of the model and algoritmh (`save_checkpoint`, `load_checkpoint`).
+# * displaying images (`show_images`).
+# -----------------------------------------------------------
+
 import torch
 import numpy as np
 import PIL

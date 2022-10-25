@@ -1,13 +1,22 @@
+# -----------------------------------------------------------
+# This file contains implementation of the model used in Section 4.2, and its layers.
+# The `class` for the layers: `Deterministic`, `Projection`, `Output` is
+# modified from https://github.com/enijkamp/short_run_inf.
+# The `class` for the model: `NLVM` is based upon https://arxiv.org/abs/1912.01909.
+# The `class` called `NormalVI` is the variational approximation used as a baseline for Section 4.2.
+# See Appendix F.3 https://arxiv.org/pdf/2204.12965.pdf for more details.
+# -----------------------------------------------------------
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchtyping import TensorType
 
 
-# TODO: maybe there's a better architecture that we should be using?
-# TODO: Re-adjust layers to admit different image widths and heights?
-
 class Deterministic(nn.Module):
+    """
+    The Deterministic Layer used in NLVM.
+    """
     def __init__(self, in_dim, out_dim, activation=F.gelu):
         super(Deterministic, self).__init__()
 
@@ -33,6 +42,9 @@ class Deterministic(nn.Module):
 
 
 class Projection(nn.Module):
+    """
+    The Projection Layer used in NLVM.
+    """
     def __init__(self, in_dim, ngf=16, coef=4, activation=F.gelu):
         super(Projection, self).__init__()
 
@@ -58,6 +70,9 @@ class Projection(nn.Module):
 
 
 class Output(nn.Module):
+    """
+    The Output Layer used in NLVM.
+    """
     def __init__(self, x_in, nc):
         super(Output, self).__init__()
         self.output_layer = nn.ConvTranspose2d(x_in, nc, kernel_size=4,
@@ -70,6 +85,9 @@ class Output(nn.Module):
 
 
 def AnyBatchShape(f):
+    """
+    Wrap the function to allow for different ndim for the batch size.
+    """
     def wrapper(self, x):
         not_batch_shape = x.shape[-1]
         batch_shape = x.shape[:-1]
@@ -81,6 +99,9 @@ def AnyBatchShape(f):
 
 
 class NLVM(nn.Module):
+    """
+    Implementation of the model. Similar to https://github.com/enijkamp/short_run_inf.
+    """
     def __init__(self, x_dim=1, nc=3, ngf=16, coef=4, sigma2=1.):
         super(NLVM, self).__init__()
         self.sigma2 = sigma2
@@ -140,11 +161,15 @@ class NLVM(nn.Module):
 
 
 class NormalVI(nn.Module):
+    """
+    Implementation of the Normal Variational family.
+    """
     def __init__(self, x_dim, n_in_channel=1, n_out_channel=16, n_hidden=512):
         """
-        Variational Normal Family with Mean and Variance parameterized. q_\theta(x|y) where
-        * y_dim is the dimension of y.
-        * x_dim is the dimension of x.
+        :param x_dim: Dimension of the latent variable.
+        :param n_in_channel: number of channels of the images.
+        :param n_out_channel: number of channel output of the conv layer.
+        :param n_hidden: dimension of the hidden (linear) layer.
         """
         super().__init__()
         self.x_dim = x_dim

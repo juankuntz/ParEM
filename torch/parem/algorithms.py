@@ -1,3 +1,9 @@
+# -----------------------------------------------------------
+# This file contains implementation of all the algorithms used
+# Section 4.2 in Scalable particle-based alternatives to EM.
+# See https://arxiv.org/pdf/2204.12965.pdf for more details.
+# -----------------------------------------------------------
+
 import torch
 from torchtyping import TensorType  # type: ignore
 from typing import List
@@ -63,9 +69,16 @@ class Algorithm:
             PATH: str,  # Path to file where checkpoints are to be saved.
             wandb_log=False,
             log_images=True,
-            constants_to_be_logged=None,
             compute_stats=False):
-        """Trains self.model with specified algorithm."""
+        """
+        Trains self.model with a specified algorithm.
+
+        :param num_epochs: Number of epochs to run the algorithm for.
+        :param wandb_log: Use wandb to log the losses and metrics if `compute_states` is True.
+        :param log_images: wandb will also log images.
+        :param compute_stats: Compute FID, KID and MSE throughout training or not.
+        :param PATH: Location to save the checkpoints.
+        """
 
         if wandb_log:  # Setup logging.
             wandb.login()
@@ -96,9 +109,9 @@ class Algorithm:
                 utils.save_checkpoint(self, Path(wandb.run.dir) / f"{epoch}.cpt")
                 wandb.save(str((Path(wandb.run.dir) / f"{epoch}.cpt").resolve()))  # wandb.save must take a string.
 
-            # Compute FID and MSE
             self._model.eval()
             stats_dic = {}
+            # Compute FID, KID and MSE
             if compute_stats:
                 n_samples = 300
                 idx = torch.randint(0, len(self.dataset), size=(n_samples,))
@@ -144,7 +157,8 @@ class Algorithm:
                              "stdg_kid": stdg_kid,
                              "mse": mse}
 
-            print(f"Epoch {epoch}: Loss {avg_loss:.3f}," + "".join(f" {key} {val:.2f}," for key, val in stats_dic.items()))
+            print(f"Epoch {epoch}: Loss {avg_loss:.3f}," + "".join(f" {key} {val:.2f},"
+                                                                   for key, val in stats_dic.items()))
             # Log checkpoint:
             if wandb_log:
                 if log_images:
@@ -164,7 +178,12 @@ class Algorithm:
         self.eval()  # Turn on eval mode and switch-off gradients.
 
     def decode(self, codes: TensorType[..., 'x_dim'], show=False):
-        """Returns decoded images stored in codes."""
+        """
+        Convert codes to images.
+
+        :param codes: The latent variable for a set of images.
+        :param show: Display resulting images from `codes`.
+        """
         self._model.eval()
         decoded_images = self._model(codes.to(self.device)).to(device='cpu')
         if show:
@@ -179,7 +198,12 @@ class Algorithm:
                ):
         """
         Returns images encoded. Unless mask is None, it will be applied to
-        each image before encoding.
+        each image before encoding. Using multi-start optimization.
+
+        :param images: The images to be converted into latent variable space.
+        :param mask: The mask for the images that is accessible.
+        :param n_starts: The parameters for number of restarts in the multi-start optimization algorithm.
+        :param patience: The parameters for early stopping in the multi-start optimization algorithm.
         """
         self.eval()
         if mask is None:
@@ -193,7 +217,7 @@ class Algorithm:
         opt = torch.optim.Adam([x], 1.)
         lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(opt, factor=0.5, min_lr=1e-5)
         mse = torch.nn.MSELoss()
-        losses = []
+
         min_loss = float("Inf")
         for i in range(1000):
             opt.zero_grad()
@@ -250,7 +274,9 @@ class Algorithm:
         return interpolated_images
 
     def update_posterior(self,):
-        """Returns n synthesized images."""
+        """
+        Update the particle approximation `self._posterior` according to the specified algorithm.
+        """
         raise NotImplementedError()
 
     def loss(self,
@@ -258,7 +284,7 @@ class Algorithm:
              particles: TensorType['batch_size', 'n_particles', 'x_dim']
              ) -> TensorType[()]:
         """
-        Returns
+        Returns the loss:
         \frac{1}{N|images|}\sum_{n=1}^N\sum_{m in images}
                                             log(p_{\theta_k}(X_k^{n,m}, y^m)).
         """
@@ -290,6 +316,17 @@ class Algorithm:
                           subsample=1000,
                           n_components=150,
                           path=None):
+        """
+        Generate Images from the model.
+
+        :param n: Number of images to be generated.
+        :param show: Show the generated images using matplotlib.
+        :param approx_type: Approximation to the latent space that is used to generate latent variables from.
+        :param subsample: The number of samples used to obtain the approximation to the latent space.
+        :param n_components: The parameter for approx_type == 'gmm'. Setting the number of
+                             components for Gaussian Mixture.
+        :param path: If not None, save the generated images in `path`.
+        """
         self.eval()
         self.update_posterior()
 
@@ -301,7 +338,7 @@ class Algorithm:
                 z = agg_posterior_approx.sample(sample_shape=torch.Size([n]))
             elif approx_type == 'gaussian_mixture_labels':
                 # Split particles by label:
-                particles_by_label = [[] for i in range(10)]
+                particles_by_label = [[] for _ in range(10)]
                 for i in range(len(self.dataset)):
                     label = int(self.dataset[i][1])
                     particles = self._posterior[i]
@@ -329,8 +366,7 @@ class Algorithm:
             elif approx_type == 'gmm':
                 from sklearn.mixture import GaussianMixture
                 import numpy as np
-                best_gmm = None
-                lowest_bic = float('Inf')
+
                 if n_components is None:
                     n_components = [10 + 100 * i for i in range(5)]
                 else:
@@ -341,15 +377,16 @@ class Algorithm:
                     else:
                         print("n_components is not int or list of ints")
                         assert 1 == 0
-                best_components = 1
+
                 idx = np.random.choice(self._posterior.shape[0], size=subsample)
                 x = self._posterior[idx].flatten(0, 1).cpu().numpy()
+
+                lowest_bic = float('Inf')
                 for i in n_components:
                     gmm = GaussianMixture(n_components=i).fit(x)
                     bic = gmm.aic(x)
                     if bic < lowest_bic:
                         lowest_bic = bic
-                        best_components = i
                         best_gmm = gmm
 
                 weights = dists.Categorical(torch.Tensor(best_gmm.weights_))
@@ -369,7 +406,6 @@ class Algorithm:
 
 class ParticleBasedAlgorithm(Algorithm):
     """Class from which all particle-based algorithms inherit from."""
-
     def __init__(self,
                  model: NLVM,
                  dataset: utils.TensorDataset,
@@ -397,8 +433,8 @@ class ParticleBasedAlgorithm(Algorithm):
             # TODO: Randomize samples?
             image = self.dataset[idx][0].unsqueeze(0)
             posterior_samples = self._model(self._posterior[idx, :n, :]
-                                           .to(self.device)
-                                           ).detach().to(image.device)
+                                            .to(self.device)
+                                            ).detach().to(image.device)
             utils.show_images(torch.concat([image, posterior_samples], dim=0))
 
     def __repr__(self):
@@ -406,6 +442,9 @@ class ParticleBasedAlgorithm(Algorithm):
 
 
 class PGA(ParticleBasedAlgorithm):
+    """
+    Implementation of the PGA algorithm in https://arxiv.org/pdf/2204.12965.pdf.
+    """
     def __init__(self,
                  model: NLVM,
                  dataset: utils.TensorDataset,
@@ -449,18 +488,13 @@ class PGA(ParticleBasedAlgorithm):
         self._model.eval()
         self._model.requires_grad_(False)
 
-        # To avoid exceeding the device's memory, we update the particles
-        # using minibatches:
-        batches = torch.utils.data.DataLoader(self.dataset, batch_size=750,
-                                              pin_memory=True)
-
         # Select particle components to be updated in this iteration:
         sub_particles = (self._posterior[idx].detach().clone()
                          .to(img_batch.device).requires_grad_(True))
 
         # Compute x gradients:
         log_p_v = self._model.log_p_v(img_batch,
-                                     sub_particles).sum()
+                                      sub_particles).sum()
         x_grad = torch.autograd.grad(log_p_v, sub_particles
                                      )[0].detach().clone()
         del sub_particles
@@ -471,7 +505,7 @@ class PGA(ParticleBasedAlgorithm):
 
         # Add noise to all components of all particles:
         self._posterior[idx] += ((2 * self.particle_step_size) ** 0.5
-                                * torch.randn_like(self._posterior[idx]))
+                                 * torch.randn_like(self._posterior[idx]))
 
         # Update theta:
         self._theta_opt.step()
@@ -481,12 +515,13 @@ class PGA(ParticleBasedAlgorithm):
         return loss.item()
 
     def update_posterior(self,):
-        # To avoid exceeding the device's memory, we update the particles
-        # using minibatches:
         pass
 
 
 class ShortRun(ParticleBasedAlgorithm):
+    """
+    Implementation of Short Run algorithm (see https://arxiv.org/abs/1912.01909).
+    """
     def __init__(self,
                  model: NLVM,
                  dataset: utils.TensorDataset,
@@ -522,7 +557,7 @@ class ShortRun(ParticleBasedAlgorithm):
         # Run chain:
         for i in range(self.n_chain_length):
             log_p_v = self._model.log_p_v(img_batch,
-                                         particles).sum()
+                                          particles).sum()
             x_grad = torch.autograd.grad(log_p_v, particles
                                          )[0].detach().clone()
 
@@ -564,7 +599,7 @@ class ShortRun(ParticleBasedAlgorithm):
                              .to(self.device).requires_grad_(True))
                 for i in range(self.n_chain_length):
                     log_p_v = self._model.log_p_v(img_particle_batch.to(self.device),
-                                                 particles).sum()
+                                                  particles).sum()
                     x_grad = torch.autograd.grad(log_p_v, particles
                                                  )[0].detach().clone()
 
@@ -578,7 +613,10 @@ class ShortRun(ParticleBasedAlgorithm):
 
 
 class AlternatingBackprop(ParticleBasedAlgorithm):
-    # A persistent version of short run algorithm.
+    """
+    Implementation of Alternating Backprop: a persistent version of short run algorithm.
+    See https://arxiv.org/abs/1606.08571.
+    """
     def __init__(self,
                  model: NLVM,
                  dataset: utils.TensorDataset,
@@ -620,7 +658,7 @@ class AlternatingBackprop(ParticleBasedAlgorithm):
                                      * torch.randn_like(particles))
             particles = particles.detach().clone().requires_grad_(True)
         self._posterior[idx] = particles.detach().clone().to(self._posterior.device)
-        ## Compute theta gradients ##
+        # Compute theta gradients
 
         # Turn on theta gradients:
         self._model.train()
@@ -645,10 +683,12 @@ class AlternatingBackprop(ParticleBasedAlgorithm):
 
 
 class VI(Algorithm):
+    """
+    Implementation of Variational Inference algorithm in VAE (see https://arxiv.org/pdf/1312.6114.pdf).
+    """
     def __init__(self,
                  model: NLVM,
                  dataset: utils.TensorDataset,
-                 lambd: float = 0.1,
                  n_particles: int = 1,
                  theta_step_size: float = 1e-3,
                  theta_optimizer='sgd',  # TODO: add type hint
@@ -661,7 +701,7 @@ class VI(Algorithm):
                          theta_optimizer=theta_optimizer, device=device, n_particles=n_particles)
         self._encoder = NormalVI(self._model.x_dim, n_in_channel=dataset.n_channels).to(self.device)
         self._encoder_opt = OPTIMIZERS[q_optimizer](self._encoder.parameters(),
-                                                   lr=theta_step_size)
+                                                    lr=q_step_size)
         self.name = 'VI'
 
     def train(self):
@@ -679,10 +719,10 @@ class VI(Algorithm):
                                    'width', 'height'],
              idx: TensorType['batch_size']
              ) -> TensorType[()]:
-        '''
+        """
         Joint gradient updates of the ELBO
         See Eq 7. https://arxiv.org/pdf/1312.6114.pdf
-        '''
+        """
         self.train()
 
         # Samples from the posterior
@@ -725,7 +765,6 @@ class VI(Algorithm):
 
     def update_posterior(self):
         self.eval()
-        # Update particle cloud
         if not self._posterior_up_to_date:
             batches = torch.utils.data.DataLoader(self.dataset,
                                                   batch_size=750,
