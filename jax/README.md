@@ -44,13 +44,13 @@ To setup a [conda environment](https://docs.conda.io/projects/conda/en/latest/us
 
 ```
 git clone https://github.com/juankuntz/ParEM.git
-conda env create -f ./ParEM/environment.yml
+conda env create -f ./ParEM/jax/environment.yml
 conda activate ParEM
 ```
 
 Then run the desired notebook:
 
 ```
-jupyter-notebook ./ParEM/name_of_notebook.ipynb
+jupyter-notebook ./ParEM/jax/name_of_notebook.ipynb
 ```
 
