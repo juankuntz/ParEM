@@ -98,6 +98,7 @@ def load_checkpoint(PATH):
 
 
 def get_mnist(root_path, n_images, width=32, height=32, train=True):
+    """Return the MNIST dataset as `DatasetWithIndicesAndDetails`"""
     dataset = MNIST(root_path, train=train, download=True)
 
     # Transform dataset into torch tensors with values in [-1, 1] and discard
@@ -111,8 +112,8 @@ def get_mnist(root_path, n_images, width=32, height=32, train=True):
                           for i in range(n_images)])
 
     tensor_dataset = DatasetWithIndicesAndDetails(images, dataset.targets[:n_images],
-                                                 n_channels=1, width=width,
-                                                 height=height, name=f'MNIST_{n_images}')
+                                                  n_channels=1, width=width,
+                                                  height=height, name=f'MNIST_{n_images}')
     # TODO: Maybe there is a better way of overriding this
     tensor_dataset.n_classes = 10
     return tensor_dataset
@@ -124,7 +125,7 @@ class SingleImagesFolderMTDataset(torch.utils.data.Dataset):
                  protocol=None, num_images=None, name='', train=True):
         self.name = name
         self.n_channels = 3
-        if num_images != None:
+        if num_images is not None:
             split_size = min(split_size, num_images)
         if cache is not None and os.path.exists(cache):
             with open(cache, 'rb') as f:
@@ -209,6 +210,7 @@ class SingleImagesFolderMTDataset(torch.utils.data.Dataset):
 # TODO: move the download commands from CelebA.ipynb into get_celeba
 
 def get_celeba(data_path, n_images, train=True):
+    """Return the CelebA dataset as `SingleImagesFolderMTDataset`"""
     dataset = SingleImagesFolderMTDataset(root=data_path,
                                           cache=None,
                                           num_images=n_images,

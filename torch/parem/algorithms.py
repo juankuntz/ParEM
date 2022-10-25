@@ -76,7 +76,7 @@ class Algorithm:
         :param num_epochs: Number of epochs to run the algorithm for.
         :param wandb_log: Use wandb to log the losses and metrics if `compute_states` is True.
         :param log_images: wandb will also log images.
-        :param compute_stats: Compute FID, KID and MSE throughout training or not.
+        :param compute_stats: Compute FID and MSE throughout training or not.
         :param PATH: Location to save the checkpoints.
         """
 
@@ -111,34 +111,24 @@ class Algorithm:
 
             self._model.eval()
             stats_dic = {}
-            # Compute FID, KID and MSE
+            # Compute FID and MSE
             if compute_stats:
                 n_samples = 300
                 idx = torch.randint(0, len(self.dataset), size=(n_samples,))
 
-                # GMM Sampling
+                # Images sampled from GMM approximation of latent distribution.
                 model_samples = self.synthesize_images(n_samples,
                                                        show=False,
                                                        approx_type='gmm')
                 data_samples = torch.stack([self.dataset[id][0] for id in idx], dim=0)
                 gmm_fid = stats.compute_fid(data_samples,
                                             model_samples,
-                                            n=n_samples,
-                                            nn_feature=None)
-                gmm_kid = stats.compute_kid(data_samples,
-                                            model_samples,
-                                            n=n_samples,
                                             nn_feature=None)
 
-                # Standard normal sampling
+                # Images sampled from prior
                 model_samples, _ = self._model.sample(n_samples)
                 stdg_fid = stats.compute_fid(data_samples,
                                              model_samples,
-                                             n=n_samples,
-                                             nn_feature=None)
-                stdg_kid = stats.compute_kid(data_samples,
-                                             model_samples,
-                                             n=n_samples,
                                              nn_feature=None)
 
                 mask = torch.ones(32, 32, dtype=torch.bool)
@@ -152,9 +142,7 @@ class Algorithm:
                 reconstructed_image = self.reconstruct(img, mask, show=False)
                 mse = ((img - reconstructed_image) ** 2).mean([-1, -2, -3]).mean(0).item()
                 stats_dic = {"gmm_fid": gmm_fid,
-                             "gmm_kid": gmm_kid,
                              "stdg_fid": stdg_fid,
-                             "stdg_kid": stdg_kid,
                              "mse": mse}
 
             print(f"Epoch {epoch}: Loss {avg_loss:.3f}," + "".join(f" {key} {val:.2f},"
@@ -179,7 +167,7 @@ class Algorithm:
 
     def decode(self, codes: TensorType[..., 'x_dim'], show=False):
         """
-        Convert codes to images.
+        Convert codes (or latent variables) to images.
 
         :param codes: The latent variable for a set of images.
         :param show: Display resulting images from `codes`.
@@ -197,7 +185,7 @@ class Algorithm:
                patience: int = 50,
                ):
         """
-        Returns images encoded. Unless mask is None, it will be applied to
+        Returns images encoded. If mask is not None, it will be applied to
         each image before encoding. Using multi-start optimization.
 
         :param images: The images to be converted into latent variable space.
@@ -322,8 +310,8 @@ class Algorithm:
 
         :param n: Number of images to be generated.
         :param show: Show the generated images using matplotlib.
-        :param approx_type: Approximation to the latent space that is used to generate latent variables from.
-        :param subsample: The number of samples used to obtain the approximation to the latent space.
+        :param approx_type: Approximation to the latent distribution that is used to generate latent variables from.
+        :param subsample: The number of samples used to obtain the approximation to the latent distribution.
         :param n_components: The parameter for approx_type == 'gmm'. Setting the number of
                              components for Gaussian Mixture.
         :param path: If not None, save the generated images in `path`.
@@ -445,7 +433,6 @@ class ParticleBasedAlgorithm(Algorithm):
 class PGD(ParticleBasedAlgorithm):
     """
     Implementation of the PGD algorithm in https://arxiv.org/pdf/2204.12965.pdf.
-
     """
     def __init__(self,
                  model: NLVM,
@@ -732,7 +719,7 @@ class VI(Algorithm):
 
     def train(self):
         """
-        For a description, see inherited `Algorithm` class.
+        Turns on gradient computation for _model, and puts _encoder and _model into train mode.
         """
         self._model.train()
         self._model.requires_grad_(True)
@@ -740,7 +727,7 @@ class VI(Algorithm):
 
     def eval(self):
         """
-        For a description, see inherited `Algorithm` class.
+        Turns off gradient computation for _model, and puts _encoder and _model into eval mode.
         """
         self._model.eval()
         self._model.requires_grad_(False)

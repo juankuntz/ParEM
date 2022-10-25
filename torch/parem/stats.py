@@ -11,7 +11,6 @@ from torchmetrics.image.fid import FrechetInceptionDistance
 def compute_fid(dataset_samples,
                 model_samples,
                 device='cuda',
-                n=100,
                 nn_feature=None):
     # Sample images from model and from dataset
     real_images = ((dataset_samples + 1.) / 2 * 255).to(torch.uint8)
@@ -30,5 +29,6 @@ def compute_fid(dataset_samples,
     fid = FrechetInceptionDistance(feature=feature).to(device)
     fid.update(real_images.to(device), real=True)  # Add real images
     fid.update(fake_images.to(device), real=False)  # Add fake images
+    # Compute FID
     fid_mean = fid.compute()
     return fid_mean.item()
