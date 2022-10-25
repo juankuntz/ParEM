@@ -39,6 +39,6 @@ conda activate ParEM_torch
 Then run the desired notebook:
 
 ```
-jupyter-notebook ./ParEM/torch/name_of_notebook.ipynb
+jupyter-notebook ./ParEM/torch/notebooks/name_of_notebook.ipynb
 ```
 
