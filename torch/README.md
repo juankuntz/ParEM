@@ -23,3 +23,22 @@ The notebooks can be accessed by clicking the links below and logging into a Goo
 |:----:|:-----|
 |[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/juankuntz/ParEM/blob/main/torch/notebooks/MNIST.ipynb)  | MNIST |
 |[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/juankuntz/ParEM/blob/main/torch/notebooks/CelebA.ipynb) | CelebA |
+
+## Run locally
+
+The required packages (and its versions) can be seen in `requirements.txt`.
+
+To setup a [conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html) with these packages, clone the repository and use the `environment.yml` file included in it:
+
+```
+git clone https://github.com/juankuntz/ParEM.git
+conda env create -f ./ParEM/torch/environment.yml
+conda activate ParEM_torch
+```
+
+Then run the desired notebook:
+
+```
+jupyter-notebook ./ParEM/torch/name_of_notebook.ipynb
+```
+

@@ -1,4 +1,4 @@
-name: ParEM
+name: ParEM_jax
 channels:
   - conda-forge
 dependencies:
