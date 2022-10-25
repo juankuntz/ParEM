@@ -11,8 +11,9 @@
 
 This repository contains Jupyter notebooks illustrating the application of the 
 algorithms in [Kuntz et al. (2022)](https://juankuntz.github.io/publication/parem/)
-for the Toy Hierarchical Model,
-Logistic Regression, and Bayesian Neural Network. These examples are written in [JAX](https://github.com/google/jax). 
+for the Toy Hierarchical Model (Example 1, and Figure 2),
+Logistic Regression (Appendix F.4), and Bayesian Neural Network (Section 4.1).
+These examples are written in [JAX](https://github.com/google/jax). 
  
 
 ## Run on Colab
