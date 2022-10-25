@@ -315,7 +315,7 @@ class Algorithm:
 
         :param n: Number of images to be generated.
         :param show: Show the generated images using matplotlib.
-        :param approx_type: Approximation to the latent distribution that is used to generate latent variables from.
+        :param approx_type: Choose from ['gaussian', 'gmm', 'gaussian_mixture_labels']. Approximation to the latent distribution that is used to generate latent variables from.
         :param subsample: The number of samples used to obtain the approximation to the latent distribution.
         :param n_components: The parameter for approx_type == 'gmm'. Setting the number of
                              components for Gaussian Mixture.
@@ -425,6 +425,7 @@ class ParticleBasedAlgorithm(Algorithm):
                                       "greater than the number of desired" \
                                       "particles."
         self.eval()
+        self.update_posterior()
         with torch.no_grad():
             image = self.dataset[idx][0].unsqueeze(0)
             posterior_samples = self._model(self._posterior[idx, :n, :]
