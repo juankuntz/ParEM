@@ -256,9 +256,10 @@ class Algorithm:
                 for i in range(images.shape[0]):
                     image = images[i]
                     masked_image = image * mask
+                    path = None if path is None else path / f'{i}.pdf'
                     utils.show_images(torch.stack([image, masked_image,
                                                    reconstructed_images[i]]),
-                                      path=path / f'{i}.pdf',
+                                      path=path,
                                       nrow=3)
         return reconstructed_images
 
