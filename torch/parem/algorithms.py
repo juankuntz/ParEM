@@ -5,18 +5,16 @@
 # -----------------------------------------------------------
 
 import torch
+from typing import Union, Optional
 from torchtyping import TensorType  # type: ignore
-from typing import List
 from parem.models import NLVM, NormalVI
 import parem.stats as stats
-from torch.utils.data import TensorDataset, DataLoader
+from torch.utils.data import TensorDataset
 import parem.utils as utils
 import wandb
 import torch.distributions as dists
-
-
-# TODO: Add return type hints throughout project.
-# TODO: Add early stopping.
+from torch.optim import Optimizer
+from pathlib import Path
 
 OPTIMIZERS = {'sgd': torch.optim.SGD,
               'adagrad': torch.optim.Adagrad,
@@ -32,7 +30,7 @@ class Algorithm:
                  dataset: utils.TensorDataset,
                  theta_step_size: float = 0.1,
                  q_step_size: float = 1e-3,
-                 theta_optimizer='sgd',  # TODO: add type hint
+                 theta_optimizer: Union[str, Optimizer] = 'sgd',
                  train_batch_size: int = 100,
                  device: str = 'cpu',
                  n_particles: int = 1,
@@ -66,10 +64,10 @@ class Algorithm:
 
     def run(self,
             num_epochs: int,
-            PATH: str,  # Path to file where checkpoints are to be saved.
-            wandb_log=False,
-            log_images=True,
-            compute_stats=False):
+            path: Optional[Path],  # Path to file where checkpoints are to be saved.
+            wandb_log: bool = False,
+            log_images: bool = True,
+            compute_stats: bool = False) -> None:
         """
         Trains self.model with a specified algorithm.
 
@@ -77,7 +75,7 @@ class Algorithm:
         :param wandb_log: Use wandb to log the losses and metrics if `compute_states` is True.
         :param log_images: wandb will also log images.
         :param compute_stats: Compute FID and MSE throughout training or not.
-        :param PATH: Location to save the checkpoints.
+        :param path: Location to save the checkpoints.
         """
 
         if wandb_log:  # Setup logging.
@@ -103,7 +101,7 @@ class Algorithm:
             self._losses.append(avg_loss)
 
             # Save checkpoint:
-            utils.save_checkpoint(self, PATH)
+            utils.save_checkpoint(self, path)
             if wandb_log:
                 from pathlib import Path
                 utils.save_checkpoint(self, Path(wandb.run.dir) / f"{epoch}.cpt")
@@ -120,7 +118,7 @@ class Algorithm:
                 model_samples = self.synthesize_images(n_samples,
                                                        show=False,
                                                        approx_type='gmm')
-                data_samples = torch.stack([self.dataset[id][0] for id in idx], dim=0)
+                data_samples = torch.stack([self.dataset[_id][0] for _id in idx], dim=0)
                 gmm_fid = stats.compute_fid(data_samples,
                                             model_samples,
                                             nn_feature=None)
@@ -165,7 +163,9 @@ class Algorithm:
 
         self.eval()  # Turn on eval mode and switch-off gradients.
 
-    def decode(self, codes: TensorType[..., 'x_dim'], show=False):
+    def decode(self,
+               codes: TensorType[..., 'x_dim'],
+               show: bool = False) -> TensorType[..., 'n_channels', 'width', 'height']:
         """
         Convert codes (or latent variables) to images.
 
@@ -183,7 +183,7 @@ class Algorithm:
                mask: TensorType['width', 'height'] = None,
                n_starts: int = 4,  # Number of starts for multi-start optimization.
                patience: int = 50,
-               ):
+               ) -> TensorType[..., 'n_channels', 'width', 'height']:
         """
         Returns images encoded. If mask is not None, it will be applied to
         each image before encoding. Using multi-start optimization.
@@ -226,7 +226,9 @@ class Algorithm:
         ind = loss.argmin()
         return x[ind].clone().detach()
 
-    def sample_image_posterior(self, idx, n: int):  # TODO: add idx type hint
+    def sample_image_posterior(self,
+                               idx: int,
+                               n: int) -> TensorType['n', 'n_channels', 'width', 'height']:
         """Returns n samples from idx's image posterior."""
         raise NotImplementedError()
 
@@ -234,8 +236,8 @@ class Algorithm:
                     images: TensorType['n_images', 'n_channels',
                                        'width', 'height'],
                     mask: TensorType['width', 'height'] = None,
-                    show=True,
-                    path=None):
+                    show: bool = True,
+                    path: Optional[Path] = None):
         """Returns images reconstructed."""
         self.eval()
         reconstructed_images = self.decode(self.encode(images, mask))
@@ -262,7 +264,7 @@ class Algorithm:
             utils.show_images(interpolated_images)
         return interpolated_images
 
-    def update_posterior(self,):
+    def update_posterior(self,) -> None:
         """
         Update the particle approximation `self._posterior` according to the specified algorithm.
         """
@@ -289,7 +291,10 @@ class Algorithm:
         self._posterior.requires_grad_(False)
         self._model.requires_grad_(False)
 
-    def sample_image(self, n: int, show=False, path=None):
+    def sample_image(self,
+                     n: int,
+                     show=False,
+                     path: Optional[Path] = None):
         """Displays the n images sampled from the joint distribution."""
         samples, _ = self._model.sample(n)
         fig, grid = utils.show_images(samples,
@@ -302,9 +307,9 @@ class Algorithm:
                           n: int = 1,
                           show: bool = True,
                           approx_type: str = 'gaussian',
-                          subsample=1000,
-                          n_components=150,
-                          path=None):
+                          subsample: int = 1000,
+                          n_components: int = 150,
+                          path: Optional[Path] = None):
         """
         Generate Images from the model.
 
@@ -401,7 +406,7 @@ class ParticleBasedAlgorithm(Algorithm):
                  theta_step_size: float = 0.1,
                  n_particles: int = 1,
                  particle_step_size: float = 0.1,
-                 theta_optimizer='sgd',  # TODO: add type hint
+                 theta_optimizer: Union[str, Optimizer] = 'sgd',
                  train_batch_size: int = 100,
                  device: str = 'cpu'):
         super().__init__(model, dataset, train_batch_size=train_batch_size,
@@ -411,7 +416,9 @@ class ParticleBasedAlgorithm(Algorithm):
         self.device = device
         self.particle_step_size = particle_step_size
 
-    def sample_image_posterior(self, idx, n: int):  # TODO: add idx type hint
+    def sample_image_posterior(self,
+                               idx: int,
+                               n: int):
         """Returns first n samples from idx's image posterior."""
 
         assert n <= self.n_particles, "Number of desired samples cannot be" \
@@ -419,7 +426,6 @@ class ParticleBasedAlgorithm(Algorithm):
                                       "particles."
         self.eval()
         with torch.no_grad():
-            # TODO: Randomize samples?
             image = self.dataset[idx][0].unsqueeze(0)
             posterior_samples = self._model(self._posterior[idx, :n, :]
                                             .to(self.device)
@@ -440,7 +446,7 @@ class PGD(ParticleBasedAlgorithm):
                  lambd: float = 0.1,
                  n_particles: int = 1,
                  particle_step_size: float = 0.1,
-                 theta_optimizer='sgd',  # TODO: add type hint
+                 theta_optimizer: Union[str, Optimizer] = 'sgd',
                  train_batch_size: int = 100,
                  device: str = 'cpu'):
         self.lambd = lambd
@@ -524,7 +530,7 @@ class ShortRun(ParticleBasedAlgorithm):
                  lambd: float = 0.1,
                  particle_step_size: float = 0.1,
                  n_chain_length: int = 25,
-                 theta_optimizer='sgd',  # TODO: add type hint
+                 theta_optimizer: Union[str, Optimizer] = 'sgd',
                  train_batch_size: int = 100,
                  device: str = 'cpu'):
         theta_step_size = particle_step_size * len(dataset) * lambd
@@ -587,7 +593,7 @@ class ShortRun(ParticleBasedAlgorithm):
         # Return value of loss function:
         return loss.item()
 
-    def update_posterior(self,):
+    def update_posterior(self,) -> None:
         """
         For a description, see inherited `Algorithm` class.
         """
@@ -618,7 +624,7 @@ class ShortRun(ParticleBasedAlgorithm):
 
 class AlternatingBackprop(ParticleBasedAlgorithm):
     """
-    Implementation of a subsampled version of Alternating Backprop: a 
+    Implementation of a sub-sampled version of Alternating Backprop: a
     persistent version of short run algorithm.
     See https://arxiv.org/abs/1606.08571.
     """
@@ -628,7 +634,7 @@ class AlternatingBackprop(ParticleBasedAlgorithm):
                  lambd: float = 0.1,
                  n_chain_length: int = 25,
                  particle_step_size: float = 0.1,
-                 theta_optimizer='sgd',  # TODO: add type hint
+                 theta_optimizer: Union[str, Optimizer] = 'sgd',
                  train_batch_size: int = 100,
                  device: str = 'cpu'):
         theta_step_size = particle_step_size * len(dataset) * lambd
@@ -704,9 +710,9 @@ class VI(Algorithm):
                  dataset: utils.TensorDataset,
                  n_particles: int = 1,
                  theta_step_size: float = 1e-3,
-                 theta_optimizer='sgd',  # TODO: add type hint
+                 theta_optimizer: Union[str, Optimizer] = 'sgd',
                  q_step_size: float = 1e-3,
-                 q_optimizer='sgd',
+                 q_optimizer: Union[str, Optimizer] = 'sgd',
                  train_batch_size: int = 100,
                  device: str = 'cpu'):
         super().__init__(model, dataset, train_batch_size=train_batch_size,
@@ -766,7 +772,7 @@ class VI(Algorithm):
         self._posterior_up_to_date = False
         return loss.item()
 
-    def sample_image_posterior(self, idx, n: int):  # TODO: add idx type hint
+    def sample_image_posterior(self, idx: int, n: int):
         """
         For a description, see inherited `Algorithm` class.
         """

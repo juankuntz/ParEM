@@ -5,6 +5,7 @@
 # * displaying images (`show_images`).
 # -----------------------------------------------------------
 
+from typing import Tuple, Optional, Union
 import torch
 import numpy as np
 import PIL
@@ -15,17 +16,17 @@ from torchvision.datasets import MNIST
 import os
 from torch.utils.data import TensorDataset
 from torchvision.utils import make_grid
-
+from torchtyping import TensorType
 
 import parem.models as models
 import parem.algorithms as algorithms
 from pathlib import Path
 
 
-# TODO: add somewhere a description of image format. It's meant to be nc x height x width ? nc x width x height ?
-
-
-def show_images(images, show=True, path=None, nrow=1):
+def show_images(images: TensorType['n_images', 'n_channels', 'width', 'height'],
+                show: bool = True,
+                path: Optional[Path] = None,
+                nrow: int = 1) -> Tuple:
     """Shows and returns figure of image."""
     grid = make_grid(images, nrow=nrow)
     grid = (grid.detach() + 1.) / 2  # Map from [-1, 1] to [0, 1].
@@ -68,10 +69,10 @@ class DatasetWithIndicesAndDetails(TensorDataset):
         return self.name
 
 
-def save_checkpoint(algorithm, PATH: str) -> None:
-    """Saves checkpoint at PATH."""
+def save_checkpoint(algorithm, path: Union[str, Path]) -> None:
+    """Saves checkpoint at path."""
     # Check if parent directory exists, if not create it:
-    Path(PATH).parent.mkdir(parents=True, exist_ok=True)
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
     if hasattr(algorithm, "dataset"):
         temp_dataset = algorithm.dataset
         algorithm.dataset = None
@@ -81,7 +82,7 @@ def save_checkpoint(algorithm, PATH: str) -> None:
     if hasattr(algorithm, "q_batch_index_dl"):
         temp_q_batch_index_dl = algorithm.q_batch_index_dl
         algorithm.q_batch_index_dl = None
-    torch.save(algorithm, PATH)
+    torch.save(algorithm, path)
     if hasattr(algorithm, "dataset"):
         algorithm.dataset = temp_dataset
     if hasattr(algorithm, "q_batch_index"):
@@ -90,14 +91,18 @@ def save_checkpoint(algorithm, PATH: str) -> None:
         algorithm.q_batch_index_dl = temp_q_batch_index_dl
 
 
-def load_checkpoint(PATH):
-    """Loads checkpoint from PATH."""
+def load_checkpoint(path: Union[str, Path]):
+    """Loads checkpoint from path."""
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    alg = torch.load(PATH, map_location=torch.device(device))
+    alg = torch.load(path, map_location=torch.device(device))
     return alg
 
 
-def get_mnist(root_path, n_images, width=32, height=32, train=True):
+def get_mnist(root_path: Union[str, Path],
+              n_images: int,
+              width: int = 32,
+              height: int = 32,
+              train: bool = True):
     """Return the MNIST dataset as `DatasetWithIndicesAndDetails`"""
     dataset = MNIST(root_path, train=train, download=True)
 
@@ -114,15 +119,21 @@ def get_mnist(root_path, n_images, width=32, height=32, train=True):
     tensor_dataset = DatasetWithIndicesAndDetails(images, dataset.targets[:n_images],
                                                   n_channels=1, width=width,
                                                   height=height, name=f'MNIST_{n_images}')
-    # TODO: Maybe there is a better way of overriding this
     tensor_dataset.n_classes = 10
     return tensor_dataset
 
 
-# TODO: Fix the celeba loader s.t. it works with DatasetWithIndicesAndDetails
 class SingleImagesFolderMTDataset(torch.utils.data.Dataset):
-    def __init__(self, root, cache, transform=None, workers=16, split_size=200,
-                 protocol=None, num_images=None, name='', train=True):
+    def __init__(self,
+                 root: Union[str, Path],
+                 cache,
+                 transform=None,
+                 workers: int = 16,
+                 split_size: int = 200,
+                 protocol=None,
+                 num_images: int = None,
+                 name: str = '',
+                 train: bool = True):
         self.name = name
         self.n_channels = 3
         if num_images is not None:
@@ -135,10 +146,10 @@ class SingleImagesFolderMTDataset(torch.utils.data.Dataset):
                     x: x
             self.images = []
 
-            def split_seq(seq, size):
+            def split_seq(seq, _size):
                 newseq = []
-                splitsize = 1.0 / size * len(seq)
-                for i in range(size):
+                splitsize = 1.0 / _size * len(seq)
+                for i in range(_size):
                     newseq.append(seq[int(round(i * splitsize)):int(
                         round((i + 1) * splitsize))])
                 return newseq
@@ -166,7 +177,7 @@ class SingleImagesFolderMTDataset(torch.utils.data.Dataset):
             if not train:
                 offset = 162771
             if num_images:
-                path_imgs = [path_imgs[offset+id] for id in idx]
+                path_imgs = [path_imgs[offset+_id] for _id in idx]
 
             n_splits = len(path_imgs) // split_size
             path_imgs_splits = split_seq(path_imgs, n_splits)
@@ -206,10 +217,9 @@ class SingleImagesFolderMTDataset(torch.utils.data.Dataset):
         return self.name
 
 
-# TODO: simplify SingleImagesFolderMTDataset class
-# TODO: move the download commands from CelebA.ipynb into get_celeba
-
-def get_celeba(data_path, n_images, train=True):
+def get_celeba(data_path: Union[str, Path],
+               n_images: int,
+               train: bool = True):
     """Return the CelebA dataset as `SingleImagesFolderMTDataset`"""
     dataset = SingleImagesFolderMTDataset(root=data_path,
                                           cache=None,

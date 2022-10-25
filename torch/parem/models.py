@@ -7,6 +7,7 @@
 # See Appendix F.3 https://arxiv.org/pdf/2204.12965.pdf for more details.
 # -----------------------------------------------------------
 
+from typing import Tuple
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -17,7 +18,7 @@ class Deterministic(nn.Module):
     """
     The Deterministic Layer used in NLVM.
     """
-    def __init__(self, in_dim, out_dim, activation=F.gelu):
+    def __init__(self, in_dim: int, out_dim: int, activation=F.gelu):
         super(Deterministic, self).__init__()
 
         self.activation = activation
@@ -30,7 +31,8 @@ class Deterministic(nn.Module):
         self.bn = nn.BatchNorm2d(out_dim)
         self.bn2 = nn.BatchNorm2d(out_dim)
 
-    def forward(self, x):
+    def forward(self, x: TensorType[..., 'n_channels', 'in_dim1', 'in_dim2']
+                ) -> TensorType[...,  'n_channels', 'out_dim1', 'out_dim2']:
         out = self.conv(x)
         out = self.bn(out)
         out = self.activation(out)
@@ -45,7 +47,11 @@ class Projection(nn.Module):
     """
     The Projection Layer used in NLVM.
     """
-    def __init__(self, in_dim, ngf=16, coef=4, activation=F.gelu):
+    def __init__(self,
+                 in_dim: int,
+                 ngf: int = 16,
+                 coef: int = 4,
+                 activation=F.gelu):
         super(Projection, self).__init__()
 
         self.activation = activation
@@ -58,7 +64,7 @@ class Projection(nn.Module):
         self.linear_bn = nn.BatchNorm1d(coef * ngf * ngf)
         self.deconv1_bn = nn.BatchNorm2d(ngf * coef)
 
-    def forward(self, x):
+    def forward(self, x: TensorType[..., 'in_dim']) -> TensorType[..., 'n_channels', 'out_dim1', 'out_dim2']:
         out = self.linear(x)
         out = self.linear_bn(out)
         out = self.activation(out)
@@ -73,22 +79,25 @@ class Output(nn.Module):
     """
     The Output Layer used in NLVM.
     """
-    def __init__(self, x_in, nc):
+    def __init__(self,
+                 x_in: int,
+                 nc: int):
         super(Output, self).__init__()
         self.output_layer = nn.ConvTranspose2d(x_in, nc, kernel_size=4,
                                                stride=2, padding=1)
 
-    def forward(self, x):
+    def forward(self, x: TensorType[..., 'n_channels', 'in_dim1', 'in_dim2']
+                ) -> TensorType[...,  'n_channels', 'out_dim1', 'out_dim2']:
         out = self.output_layer(x)
         out = torch.tanh(out)
         return out
 
 
-def AnyBatchShape(f):
+def anyBatchShape(f):
     """
     Wrap the function to allow for different ndim for the batch size.
     """
-    def wrapper(self, x):
+    def wrapper(self, x: TensorType[..., 'in_dim']) -> TensorType[..., 'in_dim']:
         not_batch_shape = x.shape[-1]
         batch_shape = x.shape[:-1]
         # Flatten
@@ -102,7 +111,12 @@ class NLVM(nn.Module):
     """
     Implementation of the model. Similar to https://github.com/enijkamp/short_run_inf.
     """
-    def __init__(self, x_dim=1, nc=3, ngf=16, coef=4, sigma2=1.):
+    def __init__(self,
+                 x_dim: int = 1,
+                 nc: int = 3,
+                 ngf: int = 16,
+                 coef: int = 4,
+                 sigma2: int = 1.):
         super(NLVM, self).__init__()
         self.sigma2 = sigma2
         self.x_dim = x_dim
@@ -114,20 +128,20 @@ class NLVM(nn.Module):
         self.deterministic_layer_2 = Deterministic(ngf * coef, ngf * coef)
         self.output_layer = Output(ngf * coef, nc)
 
-    @AnyBatchShape
-    def forward(self, x):
+    @anyBatchShape
+    def forward(self, x: TensorType[..., 'x_dim']) -> TensorType[..., 'n_channels', 'out_dim1', 'out_dim2']:
         out = self.projection_layer(x)
         out = self.deterministic_layer_1(out)
         out = self.deterministic_layer_2(out)
         out = self.output_layer(out)
         return out
 
-    def sample_prior(self, *shape):
+    def sample_prior(self, *shape: int):
         """Draw samples from the (individual-image) prior."""
         device = list(self.parameters())[0].device
         return torch.randn(*shape, self.x_dim, device=device)
 
-    def sample(self, *shape):
+    def sample(self, *shape: int):
         """Draw samples from the joint distribution."""
         latent = self.sample_prior(*shape)
         obs = self.forward(latent)
@@ -164,7 +178,11 @@ class NormalVI(nn.Module):
     """
     Implementation of the Normal Variational family.
     """
-    def __init__(self, x_dim, n_in_channel=1, n_out_channel=16, n_hidden=512):
+    def __init__(self,
+                 x_dim: int,
+                 n_in_channel: int = 1,
+                 n_out_channel: int = 16,
+                 n_hidden: int = 512):
         """
         :param x_dim: Dimension of the latent variable.
         :param n_in_channel: number of channels of the images.
@@ -188,7 +206,8 @@ class NormalVI(nn.Module):
         self.fc1 = nn.Linear(8 * 8 * n_out_channel * 2, n_hidden)
         self.fc2 = nn.Linear(n_hidden, x_dim * 2)
 
-    def forward(self, y: TensorType['n_batch', 'n_channels', 'width', 'width'],):
+    def forward(self, y: TensorType['n_batch', 'n_channels', 'width', 'width']
+                ) -> Tuple[TensorType['n_batch', 'x_dim'], TensorType['n_batch', 'x_dim']]:
         y = self.conv1(y)
         y = F.relu(y)
         y = self.pool1(y)

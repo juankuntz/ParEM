@@ -4,14 +4,14 @@
 # -----------------------------------------------------------
 
 import torch
-
+from torchtyping import TensorType
 from torchmetrics.image.fid import FrechetInceptionDistance
 
 
-def compute_fid(dataset_samples,
-                model_samples,
-                device='cuda',
-                nn_feature=None):
+def compute_fid(dataset_samples: TensorType[..., 'n_channels', 'width', 'height'],
+                model_samples: TensorType[..., 'n_channels', 'width', 'height'],
+                device: str = 'cuda',
+                nn_feature: bool = None):
     # Sample images from model and from dataset
     real_images = ((dataset_samples + 1.) / 2 * 255).to(torch.uint8)
     fake_images = ((model_samples + 1.) / 2 * 255).to(torch.uint8)
