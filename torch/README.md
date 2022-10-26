@@ -26,7 +26,13 @@ The notebooks can be accessed by clicking the links below and logging into a Goo
 
 ## Run locally
 
-The required packages (and its versions) can be seen in `requirements.txt`.
+The required packages (and its versions) can be seen in `requirements.txt`. Note that this is the minimum packages required to run the notebooks in `notebooks` in its current state. Additional packages are required for its full functionality. The installation can be obtained by running
+
+```
+pip install torchtyping
+pip install torchmetrics[image]
+pip install wandb
+```
 
 To setup a [conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html) with these packages, clone the repository and use the `environment.yml` file included in it:
 
@@ -39,6 +45,6 @@ conda activate ParEM_torch
 Then run the desired notebook:
 
 ```
-jupyter-notebook ./ParEM/torch/name_of_notebook.ipynb
+jupyter-notebook ./ParEM/torch/notebooks/name_of_notebook.ipynb
 ```
 
