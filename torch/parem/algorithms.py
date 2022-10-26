@@ -464,7 +464,7 @@ class ParticleBasedAlgorithm(Algorithm):
                                             .to(self.device)
                                             ).detach().to(image.device)
             utils.show_images(torch.concat([image, posterior_samples], dim=0),
-                              nrow=n)
+                              nrow=n + 1)
 
     def __repr__(self):
         return "ParticleBasedAlgorithm"
