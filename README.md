@@ -11,7 +11,7 @@
 
 This repository contains code illustrating the application of the
 algorithms in [Kuntz et al. (2022)](https://juankuntz.github.io/publication/parem/)
-and reproducing the results in the paper. In particular, for the toy hierarchical model (Section 2.1), Bayesian neural network (Section 4.1), and the Bayesian logistic regression (Appendix F.4) examples, we use [JAX](https://github.com/google/jax) and the source code is in the `jax` folder. For the generator network example (Section 4.2), we use [PyTorch](https://pytorch.org/) and the source code is in the `torch` folder.
+and reproducing the results in the paper. For the toy hierarchical model (Section 2.1), Bayesian neural network (Section 4.1), and the Bayesian logistic regression (Appendix F.4) examples, we use [JAX](https://github.com/google/jax) and the source code is in the `jax` folder. For the generator network example (Section 4.2), we use [PyTorch](https://pytorch.org/) and the source code is in the `torch` folder.
 You can run these either on [Google Colab](https://colab.research.google.com/) or
 locally on your machine.
 
