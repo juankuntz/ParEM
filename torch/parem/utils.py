@@ -142,7 +142,7 @@ class SingleImagesFolderMTDataset(torch.utils.data.Dataset):
             with open(cache, 'rb') as f:
                 self.images = pickle.load(f)
         else:
-            self.transform = transform if not transform is None else lambda \
+            self.transform = transform if transform is not None else lambda \
                     x: x
             self.images = []
 
@@ -154,10 +154,10 @@ class SingleImagesFolderMTDataset(torch.utils.data.Dataset):
                         round((i + 1) * splitsize))])
                 return newseq
 
-            def map(path_imgs):
+            def _map(_path_imgs):
                 imgs_0 = [self.transform(
                     np.array(PIL.Image.open(os.path.join(root, p_i)))) for p_i
-                    in path_imgs]
+                    in _path_imgs]
                 imgs_1 = [self.compress(img) for img in imgs_0]
 
                 print('.', end='')
@@ -184,7 +184,7 @@ class SingleImagesFolderMTDataset(torch.utils.data.Dataset):
 
             from multiprocessing.dummy import Pool as ThreadPool
             pool = ThreadPool(workers)
-            results = pool.map(map, path_imgs_splits)
+            results = pool.map(_map, path_imgs_splits)
             pool.close()
             pool.join()
 

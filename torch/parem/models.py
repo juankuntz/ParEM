@@ -93,7 +93,7 @@ class Output(nn.Module):
         return out
 
 
-def anyBatchShape(f):
+def anybatchshape(f):
     """
     Wrap the function to allow for different ndim for the batch size.
     """
@@ -128,7 +128,7 @@ class NLVM(nn.Module):
         self.deterministic_layer_2 = Deterministic(ngf * coef, ngf * coef)
         self.output_layer = Output(ngf * coef, nc)
 
-    @anyBatchShape
+    @anybatchshape
     def forward(self, x: TensorType[..., 'x_dim']) -> TensorType[..., 'n_channels', 'out_dim1', 'out_dim2']:
         out = self.projection_layer(x)
         out = self.deterministic_layer_1(out)

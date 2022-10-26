@@ -274,7 +274,7 @@ class Algorithm:
              images: TensorType['batch_size', 'n_channels', 'width', 'height'],
              particles: TensorType['batch_size', 'n_particles', 'x_dim']
              ) -> TensorType[()]:
-        """
+        r"""
         Returns the loss:
         \frac{1}{N|images|}\sum_{n=1}^N\sum_{m in images}
                                             log(p_{\theta_k}(X_k^{n,m}, y^m)).
@@ -315,7 +315,8 @@ class Algorithm:
 
         :param n: Number of images to be generated.
         :param show: Show the generated images using matplotlib.
-        :param approx_type: Choose from ['gaussian', 'gmm', 'gaussian_mixture_labels']. Approximation to the latent distribution that is used to generate latent variables from.
+        :param approx_type: Choose from ['gaussian', 'gmm', 'gaussian_mixture_labels'].
+                            Approximation to the latent distribution that is used to generate latent variables from.
         :param subsample: The number of samples used to obtain the approximation to the latent distribution.
         :param n_components: The parameter for approx_type == 'gmm'. Setting the number of
                              components for Gaussian Mixture.
@@ -431,7 +432,7 @@ class ParticleBasedAlgorithm(Algorithm):
             posterior_samples = self._model(self._posterior[idx, :n, :]
                                             .to(self.device)
                                             ).detach().to(image.device)
-            utils.show_images(torch.concat([image, posterior_samples], dim=0))
+            utils.show_images(torch.concat([image, posterior_samples], dim=0), nrow=n)
 
     def __repr__(self):
         return "ParticleBasedAlgorithm"
@@ -469,7 +470,7 @@ class PGD(ParticleBasedAlgorithm):
         Performs a sub-sample of PGD https://arxiv.org/pdf/2204.12965.pdf.
         See Eq. 16 and Eq. 13.
         """
-        ## Compute theta gradients ##
+        # Compute theta gradients
 
         # Turn on theta gradients:
         self._model.train()
@@ -482,7 +483,7 @@ class PGD(ParticleBasedAlgorithm):
         self._theta_opt.zero_grad()
         loss.backward()
 
-        ## Update particles ##
+        # Update particles
 
         # Turn off theta gradients:
         self._model.eval()
@@ -553,7 +554,7 @@ class ShortRun(ParticleBasedAlgorithm):
         Runs a short chain (with length self.n_chain_length) Langevin algorithm with step size self.particle_step_size.
         Note that the chains are initialized randomly.
         """
-        ## Run short run ##
+        # Run short run
         self._model.eval()
         self._model.requires_grad_(False)
 
@@ -574,7 +575,7 @@ class ShortRun(ParticleBasedAlgorithm):
                                      * torch.randn_like(particles))
             particles = particles.detach().clone().requires_grad_(True)
 
-        ## Compute theta gradients ##
+        # Compute theta gradients
 
         # Turn on theta gradients:
         self._model.train()
@@ -657,7 +658,7 @@ class AlternatingBackprop(ParticleBasedAlgorithm):
         Runs a short chain (with length self.n_chain_length) Langevin algorithm with step size self.particle_step_size.
         The chain is initialized from its the previous step.
         """
-        ## Run short run ##
+        # Run short run
         self.eval()
 
         # Run chain for the subset of the particle cloud.
