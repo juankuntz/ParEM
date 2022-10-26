@@ -27,7 +27,7 @@ class Algorithm:
 
     def __init__(self,
                  model: NLVM,
-                 dataset: utils.TensorDataset,
+                 dataset: TensorDataset,
                  theta_step_size: float = 0.1,
                  q_step_size: float = 1e-3,
                  theta_optimizer: Union[str, Optimizer] = 'sgd',
@@ -64,7 +64,7 @@ class Algorithm:
 
     def run(self,
             num_epochs: int,
-            path: Optional[Path],  # Path to file where checkpoints are to be saved.
+            path: Optional[Path],
             wandb_log: bool = False,
             log_images: bool = True,
             compute_stats: bool = False) -> None:
@@ -72,7 +72,8 @@ class Algorithm:
         Trains self.model with a specified algorithm.
 
         :param num_epochs: Number of epochs to run the algorithm for.
-        :param wandb_log: Use wandb to log the losses and metrics if `compute_states` is True.
+        :param wandb_log: Use wandb to log the losses and metrics if
+                          `compute_states` is True.
         :param log_images: wandb will also log images.
         :param compute_stats: Compute FID and MSE throughout training or not.
         :param path: Location to save the checkpoints.
@@ -80,7 +81,8 @@ class Algorithm:
 
         if wandb_log:  # Setup logging.
             wandb.login()
-            wandb.init(project=f"PGD_{self.dataset.name}", config=self.__dict__)
+            wandb.init(project=f"PGD_{self.dataset.name}",
+                       config=self.__dict__)
             # wandb.watch(self._model, log="all", log_freq=10)
 
         # Split dataset into batches for training:
@@ -104,8 +106,11 @@ class Algorithm:
             utils.save_checkpoint(self, path)
             if wandb_log:
                 from pathlib import Path
-                utils.save_checkpoint(self, Path(wandb.run.dir) / f"{epoch}.cpt")
-                wandb.save(str((Path(wandb.run.dir) / f"{epoch}.cpt").resolve()))  # wandb.save must take a string.
+                utils.save_checkpoint(self,
+                                      Path(wandb.run.dir) / f"{epoch}.cpt")
+                # wandb.save must take a string.
+                wandb.save(str((Path(wandb.run.dir)
+                                / f"{epoch}.cpt").resolve()))
 
             self._model.eval()
             stats_dic = {}
@@ -118,7 +123,8 @@ class Algorithm:
                 model_samples = self.synthesize_images(n_samples,
                                                        show=False,
                                                        approx_type='gmm')
-                data_samples = torch.stack([self.dataset[_id][0] for _id in idx], dim=0)
+                data_samples = torch.stack([self.dataset[_id][0]
+                                            for _id in idx], dim=0)
                 gmm_fid = stats.compute_fid(data_samples,
                                             model_samples,
                                             nn_feature=None)
@@ -138,19 +144,23 @@ class Algorithm:
                 idx = torch.randint(0, len(self.dataset), size=(30,))
                 img = self.dataset[idx][0]
                 reconstructed_image = self.reconstruct(img, mask, show=False)
-                mse = ((img - reconstructed_image) ** 2).mean([-1, -2, -3]).mean(0).item()
+                mse = ((img - reconstructed_image)
+                       ** 2).mean([-1, -2, -3]).mean(0).item()
                 stats_dic = {"gmm_fid": gmm_fid,
                              "stdg_fid": stdg_fid,
                              "mse": mse}
 
-            print(f"Epoch {epoch}: Loss {avg_loss:.3f}," + "".join(f" {key} {val:.2f},"
-                                                                   for key, val in stats_dic.items()))
+            print(f"Epoch {epoch}: Loss {avg_loss:.3f},"
+                  f"" + "".join(f" {key} {val:.2f},"
+                                for key, val in stats_dic.items()))
             # Log checkpoint:
             if wandb_log:
                 if log_images:
                     from wandb import Image
                     std_normal_samples = self.sample_image(10)
-                    gmm_samples = self.synthesize_images(10, show=False, approx_type='gmm')
+                    gmm_samples = self.synthesize_images(10,
+                                                         show=False,
+                                                         approx_type='gmm')
                     wandb.log({"std_normal_samples": Image(std_normal_samples),
                                "gmm_samples": Image(gmm_samples),
                                "loss": avg_loss,
@@ -165,7 +175,8 @@ class Algorithm:
 
     def decode(self,
                codes: TensorType[..., 'x_dim'],
-               show: bool = False) -> TensorType[..., 'n_channels', 'width', 'height']:
+               show: bool = False
+               ) -> TensorType[..., 'n_channels', 'width', 'height']:
         """
         Convert codes (or latent variables) to images.
 
@@ -181,7 +192,7 @@ class Algorithm:
     def encode(self,
                images: TensorType[..., 'n_channels', 'width', 'height'],
                mask: TensorType['width', 'height'] = None,
-               n_starts: int = 4,  # Number of starts for multi-start optimization.
+               n_starts: int = 4,
                patience: int = 50,
                ) -> TensorType[..., 'n_channels', 'width', 'height']:
         """
@@ -190,8 +201,10 @@ class Algorithm:
 
         :param images: The images to be converted into latent variable space.
         :param mask: The mask for the images that is accessible.
-        :param n_starts: The parameters for number of restarts in the multi-start optimization algorithm.
-        :param patience: The parameters for early stopping in the multi-start optimization algorithm.
+        :param n_starts: The parameters for number of restarts in
+                         the multi-start optimization algorithm.
+        :param patience: The parameters for early stopping in the multi-start
+                         optimization algorithm.
         """
         self.eval()
         if mask is None:
@@ -199,11 +212,14 @@ class Algorithm:
         else:
             mask = mask.expand(images.shape)
 
-        x = self._model.sample_prior(n_starts, *images.shape[:-3]).requires_grad_(True)
+        x = self._model.sample_prior(n_starts, *images.shape[:-3])\
+            .requires_grad_(True)
         images = images.expand(n_starts, *images.shape)
 
         opt = torch.optim.Adam([x], 1.)
-        lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(opt, factor=0.5, min_lr=1e-5)
+        lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(opt,
+                                                                  factor=0.5,
+                                                                  min_lr=1e-5)
         mse = torch.nn.MSELoss()
 
         min_loss = float("Inf")
@@ -222,7 +238,9 @@ class Algorithm:
                 break
 
         # Find the minimum MSE out of all multistart locations.
-        loss = torch.linalg.norm(images[:, mask] - self.decode(x)[:, mask], ord=2, dim=-1)
+        loss = torch.linalg.norm(images[:, mask] - self.decode(x)[:, mask],
+                                 ord=2,
+                                 dim=-1)
         ind = loss.argmin()
         return x[ind].clone().detach()
 
@@ -266,7 +284,8 @@ class Algorithm:
 
     def update_posterior(self,) -> None:
         """
-        Update the particle approximation `self._posterior` according to the specified algorithm.
+        Update the particle approximation `self._posterior`
+        according to the specified algorithm.
         """
         raise NotImplementedError()
 
@@ -315,11 +334,14 @@ class Algorithm:
 
         :param n: Number of images to be generated.
         :param show: Show the generated images using matplotlib.
-        :param approx_type: Choose from ['gaussian', 'gmm', 'gaussian_mixture_labels'].
-                            Approximation to the latent distribution that is used to generate latent variables from.
-        :param subsample: The number of samples used to obtain the approximation to the latent distribution.
-        :param n_components: The parameter for approx_type == 'gmm'. Setting the number of
-                             components for Gaussian Mixture.
+        :param approx_type: Choose from ['gaussian', 'gmm',
+                            'gaussian_mixture_labels'].
+                            Approximation to the latent distribution that is
+                            used to generate latent variables from.
+        :param subsample: The number of samples used to obtain the
+                          approximation to the latent distribution.
+        :param n_components: The parameter for approx_type == 'gmm'. Setting
+                             the number of components for Gaussian Mixture.
         :param path: If not None, save the generated images in `path`.
         """
         self.eval()
@@ -373,7 +395,8 @@ class Algorithm:
                         print("n_components is not int or list of ints")
                         assert 1 == 0
 
-                idx = np.random.choice(self._posterior.shape[0], size=subsample)
+                idx = np.random.choice(self._posterior.shape[0],
+                                       size=subsample)
                 x = self._posterior[idx].flatten(0, 1).cpu().numpy()
 
                 lowest_bic = float('Inf')
@@ -386,7 +409,9 @@ class Algorithm:
 
                 weights = dists.Categorical(torch.Tensor(best_gmm.weights_))
                 components = [dists.MultivariateNormal(mean, cov)
-                              for mean, cov in zip(torch.tensor(best_gmm.means_), torch.tensor(best_gmm.covariances_))]
+                              for mean, cov in
+                              zip(torch.tensor(best_gmm.means_),
+                                  torch.tensor(best_gmm.covariances_))]
                 z = []
                 for i in range(n):
                     label = weights.sample()
@@ -395,7 +420,8 @@ class Algorithm:
 
             synthesize_images = self.decode(z)
             if show or (path is not None):
-                utils.show_images(synthesize_images, path=path, show=show, nrow=int(n**0.5))
+                utils.show_images(synthesize_images, path=path, show=show,
+                                  nrow=int(n**0.5))
         return synthesize_images
 
 
@@ -403,16 +429,21 @@ class ParticleBasedAlgorithm(Algorithm):
     """Class from which all particle-based algorithms inherit from."""
     def __init__(self,
                  model: NLVM,
-                 dataset: utils.TensorDataset,
+                 dataset: TensorDataset,
                  theta_step_size: float = 0.1,
                  n_particles: int = 1,
                  particle_step_size: float = 0.1,
                  theta_optimizer: Union[str, Optimizer] = 'sgd',
                  train_batch_size: int = 100,
                  device: str = 'cpu'):
-        super().__init__(model, dataset, train_batch_size=train_batch_size,
-                         theta_step_size=theta_step_size, q_step_size=particle_step_size,
-                         theta_optimizer=theta_optimizer, device=device, n_particles=n_particles)
+        super().__init__(model,
+                         dataset,
+                         train_batch_size=train_batch_size,
+                         theta_step_size=theta_step_size,
+                         q_step_size=particle_step_size,
+                         theta_optimizer=theta_optimizer,
+                         device=device,
+                         n_particles=n_particles)
 
         self.device = device
         self.particle_step_size = particle_step_size
@@ -432,7 +463,8 @@ class ParticleBasedAlgorithm(Algorithm):
             posterior_samples = self._model(self._posterior[idx, :n, :]
                                             .to(self.device)
                                             ).detach().to(image.device)
-            utils.show_images(torch.concat([image, posterior_samples], dim=0), nrow=n)
+            utils.show_images(torch.concat([image, posterior_samples], dim=0),
+                              nrow=n)
 
     def __repr__(self):
         return "ParticleBasedAlgorithm"
@@ -440,11 +472,12 @@ class ParticleBasedAlgorithm(Algorithm):
 
 class PGD(ParticleBasedAlgorithm):
     """
-    Implementation of the PGD algorithm in https://arxiv.org/pdf/2204.12965.pdf.
+    Implementation of the PGD algorithm in
+    https://arxiv.org/pdf/2204.12965.pdf.
     """
     def __init__(self,
                  model: NLVM,
-                 dataset: utils.TensorDataset,
+                 dataset: TensorDataset,
                  lambd: float = 0.1,
                  n_particles: int = 1,
                  particle_step_size: float = 0.1,
@@ -524,11 +557,12 @@ class PGD(ParticleBasedAlgorithm):
 
 class ShortRun(ParticleBasedAlgorithm):
     """
-    Implementation of Short Run algorithm (see https://arxiv.org/abs/1912.01909).
+    Implementation of Short Run algorithm
+    (see https://arxiv.org/abs/1912.01909).
     """
     def __init__(self,
                  model: NLVM,
-                 dataset: utils.TensorDataset,
+                 dataset: TensorDataset,
                  lambd: float = 0.1,
                  particle_step_size: float = 0.1,
                  n_chain_length: int = 25,
@@ -551,7 +585,8 @@ class ShortRun(ParticleBasedAlgorithm):
              idx: TensorType['batch_size']
              ) -> TensorType[()]:
         """
-        Runs a short chain (with length self.n_chain_length) Langevin algorithm with step size self.particle_step_size.
+        Runs a short chain (with length self.n_chain_length) Langevin
+        algorithm with step size self.particle_step_size.
         Note that the chains are initialized randomly.
         """
         # Run short run
@@ -559,7 +594,9 @@ class ShortRun(ParticleBasedAlgorithm):
         self._model.requires_grad_(False)
 
         # Initialise particles:
-        particles = (torch.randn(img_batch.shape[0], self.n_particles, self._model.x_dim)
+        particles = (torch.randn(img_batch.shape[0],
+                                 self.n_particles,
+                                 self._model.x_dim)
                      .to(img_batch.device).requires_grad_(True))
 
         # Run chain:
@@ -603,24 +640,30 @@ class ShortRun(ParticleBasedAlgorithm):
 
         # Run chain for the whole posterior cloud
         if not self._posterior_up_to_date:
-            dataloader = torch.utils.data.DataLoader(self.dataset, batch_size=250)
+            dataloader = torch.utils.data.DataLoader(self.dataset,
+                                                     batch_size=250)
             for img_particle_batch, *_, particle_idx in dataloader:
-                particles = (torch.randn(img_particle_batch.shape[0], self.n_particles, self._model.x_dim)
+                particles = (torch.randn(img_particle_batch.shape[0],
+                                         self.n_particles,
+                                         self._model.x_dim)
                              .to(self.device).requires_grad_(True))
                 # Run chain for a subset of the posterior cloud
                 for i in range(self.n_chain_length):
-                    log_p_v = self._model.log_p_v(img_particle_batch.to(self.device),
+                    log_p_v = self._model.log_p_v(img_particle_batch
+                                                  .to(self.device),
                                                   particles).sum()
                     x_grad = torch.autograd.grad(log_p_v, particles
                                                  )[0].detach().clone()
 
                     particles = particles + (self.particle_step_size
                                              * x_grad.to(particles.device))
-                    particles = particles + ((2 * self.particle_step_size) ** 0.5
+                    particles = particles + ((2 * self.particle_step_size)
+                                             ** 0.5
                                              * torch.randn_like(particles))
                     particles = particles.detach().clone().requires_grad_(True)
                 # Update posterior
-                self._posterior[particle_idx] = particles.detach().clone().to(self._posterior.device)
+                self._posterior[particle_idx] = particles.detach().clone()\
+                    .to(self._posterior.device)
         self._posterior_up_to_date = True
 
 
@@ -632,7 +675,7 @@ class AlternatingBackprop(ParticleBasedAlgorithm):
     """
     def __init__(self,
                  model: NLVM,
-                 dataset: utils.TensorDataset,
+                 dataset: TensorDataset,
                  lambd: float = 0.1,
                  n_chain_length: int = 25,
                  particle_step_size: float = 0.1,
@@ -655,14 +698,16 @@ class AlternatingBackprop(ParticleBasedAlgorithm):
              idx: TensorType['batch_size']
              ) -> TensorType[()]:
         """
-        Runs a short chain (with length self.n_chain_length) Langevin algorithm with step size self.particle_step_size.
+        Runs a short chain (with length self.n_chain_length) Langevin algorithm
+        with step size self.particle_step_size.
         The chain is initialized from its the previous step.
         """
         # Run short run
         self.eval()
 
         # Run chain for the subset of the particle cloud.
-        particles = self._posterior[idx].detach().clone().to(self.device).requires_grad_(True)
+        particles = self._posterior[idx].detach().clone().to(self.device)\
+            .requires_grad_(True)
         for i in range(self.n_chain_length):
             log_p_v = self._model.log_p_v(img_batch.to(self.device),
                                           particles).sum()
@@ -675,7 +720,8 @@ class AlternatingBackprop(ParticleBasedAlgorithm):
                                      * torch.randn_like(particles))
             particles = particles.detach().clone().requires_grad_(True)
         # Update posterior.
-        self._posterior[idx] = particles.detach().clone().to(self._posterior.device)
+        self._posterior[idx] = particles.detach().clone()\
+            .to(self._posterior.device)
         # Compute theta gradients
 
         # Turn on theta gradients:
@@ -705,11 +751,12 @@ class AlternatingBackprop(ParticleBasedAlgorithm):
 
 class VI(Algorithm):
     """
-    Implementation of Variational Inference algorithm in VAE (see https://arxiv.org/pdf/1312.6114.pdf).
+    Implementation of Variational Inference algorithm in VAE.
+    (see https://arxiv.org/pdf/1312.6114.pdf).
     """
     def __init__(self,
                  model: NLVM,
-                 dataset: utils.TensorDataset,
+                 dataset: TensorDataset,
                  n_particles: int = 1,
                  theta_step_size: float = 1e-3,
                  theta_optimizer: Union[str, Optimizer] = 'sgd',
@@ -717,17 +764,24 @@ class VI(Algorithm):
                  q_optimizer: Union[str, Optimizer] = 'sgd',
                  train_batch_size: int = 100,
                  device: str = 'cpu'):
-        super().__init__(model, dataset, train_batch_size=train_batch_size,
+        super().__init__(model,
+                         dataset,
+                         train_batch_size=train_batch_size,
                          theta_step_size=theta_step_size,
-                         theta_optimizer=theta_optimizer, device=device, n_particles=n_particles)
-        self._encoder = NormalVI(self._model.x_dim, n_in_channel=dataset.n_channels).to(self.device)
+                         theta_optimizer=theta_optimizer,
+                         device=device,
+                         n_particles=n_particles)
+        self._encoder = NormalVI(self._model.x_dim,
+                                 n_in_channel=dataset.n_channels)\
+            .to(self.device)
         self._encoder_opt = OPTIMIZERS[q_optimizer](self._encoder.parameters(),
                                                     lr=q_step_size)
         self.name = 'VI'
 
     def train(self):
         """
-        Turns on gradient computation for _model, and puts _encoder and _model into train mode.
+        Turns on gradient computation for _model, and puts _encoder
+        and _model into train mode.
         """
         self._model.train()
         self._model.requires_grad_(True)
@@ -735,7 +789,8 @@ class VI(Algorithm):
 
     def eval(self):
         """
-        Turns off gradient computation for _model, and puts _encoder and _model into eval mode.
+        Turns off gradient computation for _model, and puts _encoder
+        and _model into eval mode.
         """
         self._model.eval()
         self._model.requires_grad_(False)
@@ -756,13 +811,14 @@ class VI(Algorithm):
         mu, var = self._encoder(img_batch)
         z = torch.randn(img_batch.shape[0],
                         self.n_particles,
-                        self._model.x_dim).to(mu.device) * var.unsqueeze(1) ** 0.5 + mu.unsqueeze(1)
+                        self._model.x_dim).to(mu.device) * var.unsqueeze(1)\
+            ** 0.5 + mu.unsqueeze(1)
 
         # Compute loss
         log_prob = self._model.log_p_v(img_batch, z).mean()
         kl = 0.5 * (1 + torch.log(var) - mu ** 2 - var).sum()
-        # There is an additional multiplicative constant that is the dataset size.
-        # This can be removed.
+        # There is an additional multiplicative constant
+        # that is the dataset size.
         loss = - (log_prob - kl) * (1. / img_batch.shape[0])
 
         # Update variational distribution and model.
@@ -783,9 +839,11 @@ class VI(Algorithm):
             image = self.dataset[idx][0].unsqueeze(0)
             mu, var = self._encoder(image.to(self.device))
             # Sample latent variable
-            z = torch.randn(n, self._model.x_dim).to(mu.device) * var ** 0.5 + mu
+            z = torch.randn(n,
+                            self._model.x_dim).to(mu.device) * var ** 0.5 + mu
 
-            posterior_samples = self._model(z.to(self.device)).detach().to(image.device)
+            posterior_samples = self._model(z.to(self.device)).detach()\
+                .to(image.device)
             utils.show_images(torch.concat([image, posterior_samples], dim=0))
 
     def update_posterior(self):
@@ -803,7 +861,9 @@ class VI(Algorithm):
                 # Sample from the desired distribution
                 z = torch.randn(img_batch.shape[0],
                                 self.n_particles,
-                                self._model.x_dim).to(mu.device) * var.unsqueeze(1) ** 0.5 + mu.unsqueeze(1)
+                                self._model.x_dim).to(mu.device) \
+                    * var.unsqueeze(1) ** 0.5 + mu.unsqueeze(1)
                 # update the posterior
-                self._posterior[idx] = z.clone().detach().to(self._posterior.device)
+                self._posterior[idx] = z.clone().detach()\
+                    .to(self._posterior.device)
         self._posterior_up_to_date = True

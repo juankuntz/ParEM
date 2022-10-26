@@ -1,7 +1,9 @@
 # -----------------------------------------------------------
 # This file contains all the utility code for:
-# * interacting with the dataset (`get_celeba`, `get_mnist`) modified from https://github.com/enijkamp/short_run_inf.
-# * saving checkpoints of the model and algoritmh (`save_checkpoint`, `load_checkpoint`).
+# * interacting with the dataset (`get_celeba`, `get_mnist`) modified
+#   from https://github.com/enijkamp/short_run_inf.
+# * saving checkpoints of the model and algorithm
+#   (`save_checkpoint`, `load_checkpoint`).
 # * displaying images (`show_images`).
 # -----------------------------------------------------------
 
@@ -17,9 +19,6 @@ import os
 from torch.utils.data import TensorDataset
 from torchvision.utils import make_grid
 from torchtyping import TensorType
-
-import parem.models as models
-import parem.algorithms as algorithms
 from pathlib import Path
 
 
@@ -116,9 +115,12 @@ def get_mnist(root_path: Union[str, Path],
     images = torch.stack([transform(dataset.data[i].numpy())
                           for i in range(n_images)])
 
-    tensor_dataset = DatasetWithIndicesAndDetails(images, dataset.targets[:n_images],
-                                                  n_channels=1, width=width,
-                                                  height=height, name=f'MNIST_{n_images}')
+    tensor_dataset = DatasetWithIndicesAndDetails(images,
+                                                  dataset.targets[:n_images],
+                                                  n_channels=1,
+                                                  width=width,
+                                                  height=height,
+                                                  name=f'MNIST_{n_images}')
     tensor_dataset.n_classes = 10
     return tensor_dataset
 

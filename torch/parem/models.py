@@ -1,9 +1,10 @@
 # -----------------------------------------------------------
-# This file contains implementation of the model used in Section 4.2, and its layers.
-# The `class` for the layers: `Deterministic`, `Projection`, `Output` is
-# modified from https://github.com/enijkamp/short_run_inf.
-# The `class` for the model: `NLVM` is based upon https://arxiv.org/abs/1912.01909.
-# The `class` called `NormalVI` is the variational approximation used as a baseline for Section 4.2.
+# This file contains implementation of the model used in Section 4.2,
+# and its layers. The `class` for the layers: `Deterministic`, `Projection`,
+# `Output` is modified from https://github.com/enijkamp/short_run_inf.
+# The `class` for the model: `NLVM` is based upon
+# https://arxiv.org/abs/1912.01909. The `class` called `NormalVI` is the
+# variational approximation used as a baseline for Section 4.2.
 # See Appendix F.3 https://arxiv.org/pdf/2204.12965.pdf for more details.
 # -----------------------------------------------------------
 
@@ -64,7 +65,8 @@ class Projection(nn.Module):
         self.linear_bn = nn.BatchNorm1d(coef * ngf * ngf)
         self.deconv1_bn = nn.BatchNorm2d(ngf * coef)
 
-    def forward(self, x: TensorType[..., 'in_dim']) -> TensorType[..., 'n_channels', 'out_dim1', 'out_dim2']:
+    def forward(self, x: TensorType[..., 'in_dim']
+                ) -> TensorType[..., 'n_channels', 'out_dim1', 'out_dim2']:
         out = self.linear(x)
         out = self.linear_bn(out)
         out = self.activation(out)
@@ -97,7 +99,8 @@ def anybatchshape(f):
     """
     Wrap the function to allow for different ndim for the batch size.
     """
-    def wrapper(self, x: TensorType[..., 'in_dim']) -> TensorType[..., 'in_dim']:
+    def wrapper(self, x: TensorType[..., 'in_dim']
+                ) -> TensorType[..., 'in_dim']:
         not_batch_shape = x.shape[-1]
         batch_shape = x.shape[:-1]
         # Flatten
@@ -109,7 +112,8 @@ def anybatchshape(f):
 
 class NLVM(nn.Module):
     """
-    Implementation of the model. Similar to https://github.com/enijkamp/short_run_inf.
+    Implementation of the model.
+    Similar to https://github.com/enijkamp/short_run_inf.
     """
     def __init__(self,
                  x_dim: int = 1,
@@ -129,7 +133,8 @@ class NLVM(nn.Module):
         self.output_layer = Output(ngf * coef, nc)
 
     @anybatchshape
-    def forward(self, x: TensorType[..., 'x_dim']) -> TensorType[..., 'n_channels', 'out_dim1', 'out_dim2']:
+    def forward(self, x: TensorType[..., 'x_dim']
+                ) -> TensorType[..., 'n_channels', 'out_dim1', 'out_dim2']:
         out = self.projection_layer(x)
         out = self.deterministic_layer_1(out)
         out = self.deterministic_layer_2(out)
@@ -145,7 +150,6 @@ class NLVM(nn.Module):
         """Draw samples from the joint distribution."""
         latent = self.sample_prior(*shape)
         obs = self.forward(latent)
-        obs = obs  # + self.sigma2 ** 0.5 * torch.randn_like(obs, device=obs.device)
         obs.clip_(-1., 1.)
         return obs, latent
 
@@ -207,7 +211,8 @@ class NormalVI(nn.Module):
         self.fc2 = nn.Linear(n_hidden, x_dim * 2)
 
     def forward(self, y: TensorType['n_batch', 'n_channels', 'width', 'width']
-                ) -> Tuple[TensorType['n_batch', 'x_dim'], TensorType['n_batch', 'x_dim']]:
+                ) -> Tuple[TensorType['n_batch', 'x_dim'],
+                           TensorType['n_batch', 'x_dim']]:
         y = self.conv1(y)
         y = F.relu(y)
         y = self.pool1(y)
