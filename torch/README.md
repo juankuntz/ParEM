@@ -4,8 +4,8 @@
 
 This repository contains Jupyter notebooks illustrating the application of the 
 algorithms in [Kuntz et al. (2022)](https://juankuntz.github.io/publication/parem/)
-to the generator network model (Section 4.2).
-These examples are written in [PyTorch](https://github.com/pytorch/pytorch). 
+to the generator network example (Section 4.2).
+Here, we use [PyTorch](https://github.com/pytorch/pytorch). 
 
 ## Run on Colab
 
