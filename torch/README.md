@@ -12,7 +12,7 @@
 This repository contains Jupyter notebooks illustrating the application of the 
 algorithms in [Kuntz et al. (2022)](https://juankuntz.github.io/publication/parem/)
 for the generator model (Section 4.2).
-These examples are written in [torch](https://github.com/pytorch/pytorch). 
+These examples are written in [PyTorch](https://github.com/pytorch/pytorch). 
 We recommend running these examples on Google Colab. 
 
 ## Run on Colab
