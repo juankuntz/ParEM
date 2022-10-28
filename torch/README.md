@@ -1,4 +1,4 @@
-# <p align="center">Generator network model (Section 4.2)<br>
+# <p align="center">Generator network (Section 4.2)<br>
 
 ## Description
 
