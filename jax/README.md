@@ -1,4 +1,4 @@
-# <p align="center">Toy hierarchical model (Section 2.1), Bayesian neural network (Section 4.1), and Bayesian logistic regression (Appendix F.4) examples<br><br>Under review</p>
+# <p align="center">Toy hierarchical model (Section 2.1), Bayesian neural network (Section 4.1), and Bayesian logistic regression (Appendix F.4).<br>
 
 ## Description
 
