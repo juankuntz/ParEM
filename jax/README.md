@@ -1,10 +1,10 @@
-# <p align="center">Toy hierarchical model (Section 2.1), Bayesian neural network (Section 4.1), and Bayesian logistic regression (Appendix F.4).<br>
+# <p align="center">Toy hierarchical model (Section 2.1), Bayesian neural network (Section 4.1), and Bayesian logistic regression (Appendix F.4)<br>
 
 ## Description
 
 This folder contains Jupyter notebooks illustrating the application of the 
 algorithms in [Kuntz et al. (2022)](https://juankuntz.github.io/publication/parem/)
-for the the toy hierarchical model (Section 2.1), Bayesian neural network (Section 4.1), and Bayesian logistic regression (Appendix F.4) examples.
+to the toy hierarchical model (Section 2.1), Bayesian neural network (Section 4.1), and Bayesian logistic regression (Appendix F.4) examples.
 These examples are written in [JAX](https://github.com/google/jax) and they either be run on Colab or locally on your machine. 
  
 
