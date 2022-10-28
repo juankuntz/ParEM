@@ -1,19 +1,11 @@
-# <p align="center">Scalable particle-based alternatives to EM in JAX<br><br>Under review</p>
-
-<div align="center">
-  <a href="https://juankuntz.github.io/" target="_blank">Juan&nbsp;Kuntz</a> &emsp; <b>&middot;</b> &emsp;
-  <a href="https://jenninglim.github.io/" target="_blank">Jen Ning&nbsp;Lim</a> &emsp; <b>&middot;</b> &emsp;
-  <a href="https://warwick.ac.uk/fac/sci/statistics/staff/academic-research/johansen/" target="_blank">Adam M.&nbsp;Johansen</a> &emsp; </b> 
-
-</div>
+# <p align="center">Toy hierarchical model (Section 2.1), Bayesian neural network (Section 4.1), and Bayesian logistic regression (Appendix F.4) examples<br><br>Under review</p>
 
 ## Description
 
-This repository contains Jupyter notebooks illustrating the application of the 
+This folder contains Jupyter notebooks illustrating the application of the 
 algorithms in [Kuntz et al. (2022)](https://juankuntz.github.io/publication/parem/)
-for the Toy Hierarchical Model (Example 1, and Figure 2),
-Logistic Regression (Appendix F.4), and Bayesian Neural Network (Section 4.1).
-These examples are written in [JAX](https://github.com/google/jax). 
+for the the toy hierarchical model (Section 2.1), Bayesian neural network (Section 4.1), and Bayesian logistic regression (Appendix F.4) examples.
+These examples are written in [JAX](https://github.com/google/jax) and they either be run on Colab or locally on your machine. 
  
 
 ## Run on Colab
@@ -40,7 +32,7 @@ Running the notebooks locally requires:
 - scikit-learn == 0.24.2
 - wget == 3.2
 
-To setup a [conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html) with these packages, clone the repository and use the `environment.yml` file included in it:
+To setup a [conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html) with these packages, clone the repository and use the `environment.yml` file included here:
 
 ```
 git clone https://github.com/juankuntz/ParEM.git
