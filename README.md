@@ -1,4 +1,4 @@
-# <p align="center">Scalable particle-based alternatives to EM<br><br>Under review</p>
+# <p align="center">Particle algorithms for maximum likelihood training of latent variable models<br><br>AISTATS (accepted)</p>
 
 <div align="center">
   <a href="https://juankuntz.github.io/" target="_blank">Juan&nbsp;Kuntz</a> &emsp; <b>&middot;</b> &emsp;
@@ -32,7 +32,7 @@ If you find the code useful for your research, please consider citing our prepri
 ```bib
 @article{Kuntz2022,
 author = {Kuntz, J. and Lim, J. N. and Johansen, A. M.},
-title = {Scalable particle-based alternatives to EM},
+title = {Particle algorithms for maximum likelihood training of latent variable models},
 journal = {arXiv preprint arXiv:2204.12965},
 year  = {2022}
 }
