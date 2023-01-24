@@ -1,10 +1,10 @@
-# <p align="center">Generator network (Section 4.2)<br>
+# <p align="center">Generator network (Section 3.3)<br>
 
 ## Description
 
 This repository contains Jupyter notebooks illustrating the application of the 
 algorithms in [Kuntz et al. (2022)](https://juankuntz.github.io/publication/parem/)
-to the generator network example (Section 4.2). There are two notebooks: one where we train the network on the MNIST dataset and another where we train it on the CelebA dataset. In either case, we use [PyTorch](https://github.com/pytorch/pytorch) and the notebook can be run on Colab or locally on your machine. 
+to the generator network example (Section 3.3). There are two notebooks: one where we train the network on the MNIST dataset and another where we train it on the CelebA dataset. In either case, we use [PyTorch](https://github.com/pytorch/pytorch) and the notebook can be run on Colab or locally on your machine. 
 
 ## Run on Colab
 
