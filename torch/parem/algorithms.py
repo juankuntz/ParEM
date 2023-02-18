@@ -1,7 +1,8 @@
 # -----------------------------------------------------------
-# This file contains implementation of all the algorithms used
-# Section 4.2 in Scalable particle-based alternatives to EM.
-# See https://arxiv.org/pdf/2204.12965.pdf for more details.
+# This file contains implementation of all the algorithms used in Section 3.3
+# of Particle algorithms for maximum likelihood training of latent variable
+# models. See Appendix E.4 of https://arxiv.org/pdf/2204.12965.pdf for more
+# details.
 # -----------------------------------------------------------
 
 import torch

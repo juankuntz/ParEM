@@ -1,11 +1,11 @@
 # -----------------------------------------------------------
-# This file contains implementation of the model used in Section 4.2,
+# This file contains implementation of the model used in Section 3.3,
 # and its layers. The `class` for the layers: `Deterministic`, `Projection`,
 # `Output` is modified from https://github.com/enijkamp/short_run_inf.
 # The `class` for the model: `NLVM` is based upon
 # https://arxiv.org/abs/1912.01909. The `class` called `NormalVI` is the
-# variational approximation used as a baseline for Section 4.2.
-# See Appendix F.3 https://arxiv.org/pdf/2204.12965.pdf for more details.
+# variational approximation used as a baseline in Section 3.3.
+# See Appendix E.4 of https://arxiv.org/pdf/2204.12965.pdf for more details.
 # -----------------------------------------------------------
 
 from typing import Tuple
