@@ -1,4 +1,4 @@
-# <p align="center">Particle algorithms for maximum likelihood training of latent variable models<br><br>AISTATS 2023 (accepted, oral)</p>
+# <p align="center">Particle algorithms for maximum likelihood training of latent variable models<br><br>AISTATS 2023 (oral)</p>
 
 <div align="center">
   <a href="https://juankuntz.github.io/" target="_blank">Juan&nbsp;Kuntz</a> &emsp; <b>&middot;</b> &emsp;
