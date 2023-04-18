@@ -27,17 +27,21 @@ The notebooks can be accessed by clicking the links below and logging into a Goo
 |[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/juankuntz/ParEM/blob/main/torch/notebooks/CelebA.ipynb) | Generator network (CelebA) |
 
 ## Citation
-If you find the code useful for your research, please consider citing our preprint:
+If you find the code useful for your research, please consider citing our paper:
 
 ```bib
-@article{Kuntz2022,
-author = {Kuntz, J. and Lim, J. N. and Johansen, A. M.},
-title = {Particle algorithms for maximum likelihood training of latent variable models},
-journal = {arXiv preprint arXiv:2204.12965},
-year  = {2022}
+@InProceedings{Kuntz2023,
+  title = 	 {Particle algorithms for maximum likelihood training of latent variable models},
+  author =       {Kuntz, Juan and Lim, Jen Ning and Johansen, Adam M.},
+  booktitle = 	 {Proceedings of The 26th International Conference on Artificial Intelligence and Statistics},
+  pages = 	 {5134--5180},
+  year = 	 {2023},
+  volume = 	 {206},
+  series = 	 {Proceedings of Machine Learning Research},
+  url = 	 {https://proceedings.mlr.press/v206/kuntz23a.html},
 }
 ```
 
 ## License
 
-This work is made available under the MIT License. Please see our main [LICENSE](./LICENSE) file.
+This work is made available under the MIT License. Please see our [LICENSE](./LICENSE) file.
