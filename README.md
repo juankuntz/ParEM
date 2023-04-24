@@ -7,6 +7,8 @@
 
 </div>
 
+**Update**: See [here](https://github.com/juankuntz/LPAE) for new tensorflow implementations of the generator networks.
+
 ## Description
 
 This repository contains code illustrating the application of the
